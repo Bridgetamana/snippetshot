@@ -1,4 +1,4 @@
-/* global domtoimage */
+/* global htmlToImage */
 (function () {
   const vscode = acquireVsCodeApi();
   let backgroundColor = '#020617';
@@ -259,6 +259,37 @@
     return container.innerHTML;
   }
 
+  function sanitizeHtml(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const allowedTags = ['DIV', 'SPAN', 'BR', 'B', 'I', 'U', 'EM', 'STRONG', 'CODE'];
+
+    function cleanNode(node) {
+      if (node.nodeType === 1) {
+        if (!allowedTags.includes(node.tagName)) {
+          const text = document.createTextNode(node.textContent || '');
+          node.parentNode.replaceChild(text, node);
+          return;
+        }
+        const attrs = Array.from(node.attributes);
+        for (const attr of attrs) {
+          if (attr.name !== 'style' && attr.name !== 'class') {
+            node.removeAttribute(attr.name);
+          }
+        }
+      }
+      const children = Array.from(node.childNodes);
+      for (const child of children) {
+        cleanNode(child);
+      }
+    }
+
+    const children = Array.from(doc.body.childNodes);
+    for (const child of children) {
+      cleanNode(child);
+    }
+    return doc.body.innerHTML;
+  }
+
   document.addEventListener('paste', (e) => {
     const innerHTML = e.clipboardData.getData('text/html');
     const code = e.clipboardData.getData('text/plain');
@@ -268,9 +299,10 @@
       const minIndent = getMinIndent(code);
       const snippetBgColor = getSnippetBgColor(innerHTML);
       if (snippetBgColor) updateEnvironment(snippetBgColor);
-      content = minIndent !== 0 ? stripInitialIndent(innerHTML, minIndent) : innerHTML;
+      let processedHtml = minIndent !== 0 ? stripInitialIndent(innerHTML, minIndent) : innerHTML;
+      content = sanitizeHtml(processedHtml);
     } else if (code && code.trim()) {
-      content = createPlainTextSnippet(code);
+      content = sanitizeHtml(createPlainTextSnippet(code));
     } else {
       return;
     }
@@ -329,13 +361,13 @@
 
     const restore = applyExportStyles();
     const config = {
-      bgcolor: backgroundColor,
+      backgroundColor: backgroundColor,
       filter: (node) => {
         return !node.classList || !node.classList.contains('toolbar');
       },
     };
 
-    domtoimage
+    htmlToImage
       .toBlob(snippetContainerNode || document.querySelector('#snippet').parentElement, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
@@ -421,7 +453,7 @@
 
     const restore = applyExportStyles();
     const config = {
-      bgcolor: backgroundColor,
+      backgroundColor: backgroundColor,
       filter: (node) => {
         return !node.classList || !node.classList.contains('toolbar');
       },
@@ -430,7 +462,7 @@
     const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
     if (target && target.classList) target.classList.remove('capture-flash');
 
-    domtoimage
+    htmlToImage
       .toBlob(target, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
@@ -531,7 +563,7 @@
 
     const restore = applyExportStyles();
     const config = {
-      bgcolor: backgroundColor,
+      backgroundColor: backgroundColor,
       filter: (node) => {
         return !node.classList || !node.classList.contains('toolbar');
       },
@@ -540,7 +572,7 @@
     const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
     if (target && target.classList) target.classList.remove('capture-flash');
 
-    domtoimage
+    htmlToImage
       .toBlob(target, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
@@ -573,92 +605,47 @@
       });
   }
 
+  function updateStateUI(data) {
+    if (data.bgColor) {
+      backgroundColor = data.bgColor;
+      bgPicker.value = data.bgColor;
+    }
+    const bgType = data.backgroundType || data.bgType;
+    if (bgType) {
+      backgroundType = bgType;
+      document.getElementById('bgType').value = bgType;
+    }
+    if (data.gradientColor1) {
+      gradientColor1 = data.gradientColor1;
+      gradientColor1Picker.value = data.gradientColor1;
+    }
+    if (data.gradientColor2) {
+      gradientColor2 = data.gradientColor2;
+      gradientColor2Picker.value = data.gradientColor2;
+    }
+    if (data.gradientDirection) {
+      gradientDirection = data.gradientDirection;
+      gradientDirectionSelect.value = data.gradientDirection;
+    }
+    toggleBackgroundControls();
+    updateBackground();
+  }
+
   window.addEventListener('message', (e) => {
     if (e) {
       if (e.data.type === 'init') {
-        const {
-          bgColor,
-          backgroundType: bgType,
-          gradientColor1: gc1,
-          gradientColor2: gc2,
-          gradientDirection: gd,
-        } = e.data;
         applyInitialSnippet();
         vscode.setState({ innerHTML: snippetNode.innerHTML });
         toggleLineNumbers(lineNumbersCheckbox.checked);
-
-        if (bgColor) {
-          backgroundColor = bgColor;
-          bgPicker.value = bgColor;
-        }
-        if (bgType) {
-          backgroundType = bgType;
-          bgType.value = bgType;
-        }
-        if (gc1) {
-          gradientColor1 = gc1;
-          gradientColor1Picker.value = gc1;
-        }
-        if (gc2) {
-          gradientColor2 = gc2;
-          gradientColor2Picker.value = gc2;
-        }
-        if (gd) {
-          gradientDirection = gd;
-          gradientDirectionSelect.value = gd;
-        }
-        toggleBackgroundControls();
-        updateBackground();
+        updateStateUI(e.data);
       } else if (e.data.type === 'update') {
         document.execCommand('paste');
       } else if (e.data.type === 'restore') {
         snippetNode.innerHTML = e.data.innerHTML;
         toggleLineNumbers(lineNumbersCheckbox.checked);
-        if (e.data.bgColor) {
-          backgroundColor = e.data.bgColor;
-          bgPicker.value = e.data.bgColor;
-        }
-        if (e.data.backgroundType) {
-          backgroundType = e.data.backgroundType;
-          bgType.value = e.data.backgroundType;
-        }
-        if (e.data.gradientColor1) {
-          gradientColor1 = e.data.gradientColor1;
-          gradientColor1Picker.value = e.data.gradientColor1;
-        }
-        if (e.data.gradientColor2) {
-          gradientColor2 = e.data.gradientColor2;
-          gradientColor2Picker.value = e.data.gradientColor2;
-        }
-        if (e.data.gradientDirection) {
-          gradientDirection = e.data.gradientDirection;
-          gradientDirectionSelect.value = e.data.gradientDirection;
-        }
-        toggleBackgroundControls();
-        updateBackground();
+        updateStateUI(e.data);
       } else if (e.data.type === 'restoreBgColor') {
-        if (e.data.bgColor) {
-          backgroundColor = e.data.bgColor;
-          bgPicker.value = e.data.bgColor;
-        }
-        if (e.data.backgroundType) {
-          backgroundType = e.data.backgroundType;
-          bgType.value = e.data.backgroundType;
-        }
-        if (e.data.gradientColor1) {
-          gradientColor1 = e.data.gradientColor1;
-          gradientColor1Picker.value = e.data.gradientColor1;
-        }
-        if (e.data.gradientColor2) {
-          gradientColor2 = e.data.gradientColor2;
-          gradientColor2Picker.value = e.data.gradientColor2;
-        }
-        if (e.data.gradientDirection) {
-          gradientDirection = e.data.gradientDirection;
-          gradientDirectionSelect.value = e.data.gradientDirection;
-        }
-        toggleBackgroundControls();
-        updateBackground();
+        updateStateUI(e.data);
       } else if (e.data.type === 'updateSettings') {
         snippetNode.style.boxShadow = e.data.shadow;
         if (e.data.attributionEnabled !== undefined) {

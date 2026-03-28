@@ -117,7 +117,8 @@
     }
   },
   "devDependencies": {
-    "@types/dom-to-image": "^2.6.7",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
@@ -129,9 +130,10 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "prettier": "^3.6.2",
-    "typescript": "^5.4.0",
-    "@commitlint/cli": "^19.5.0",
-    "@commitlint/config-conventional": "^19.5.0",
-    "standard-version": "^9.5.0"
+    "standard-version": "^9.5.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "html-to-image": "^1.11.13"
   }
 }

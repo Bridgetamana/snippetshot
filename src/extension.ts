@@ -2,12 +2,13 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { homedir } from 'os';
+import * as crypto from 'crypto';
 
 const P_TITLE = 'SnippetShot';
 
-function writeSerializedBlobToFile(serializedBlob: string, fileName: string) {
+async function writeSerializedBlobToFile(serializedBlob: string, uri: vscode.Uri) {
   const bytes = new Uint8Array(serializedBlob.split(',').map((n) => Number(n)));
-  fs.writeFileSync(fileName, Buffer.from(bytes));
+  await vscode.workspace.fs.writeFile(uri, bytes);
 }
 
 function generateFilename(date: Date): string {
@@ -15,7 +16,7 @@ function generateFilename(date: Date): string {
   return `codesnippet-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}.png`;
 }
 
-function handleTwitterShare(
+async function handleTwitterShare(
   panel: vscode.WebviewPanel,
   data: { imageData: string; text: string; imageCopiedToClipboard?: boolean }
 ) {
@@ -25,8 +26,9 @@ function handleTwitterShare(
     const tempDir = path.join(homedir(), 'Downloads');
     const fileName = generateFilename(new Date());
     const filePath = path.join(tempDir, fileName);
+    const fileUri = vscode.Uri.file(filePath);
     const imageBuffer = Buffer.from(data.imageData, 'base64');
-    fs.writeFileSync(filePath, imageBuffer);
+    await vscode.workspace.fs.writeFile(fileUri, imageBuffer);
     vscode.env.openExternal(vscode.Uri.parse(twitterUrl));
     if (data.imageCopiedToClipboard) {
       vscode.window
@@ -168,13 +170,13 @@ export function activate(context: vscode.ExtensionContext) {
               filters: { Images: ['png'] },
               saveLabel: 'Save SnippetShot',
             })
-            .then((uri) => {
+            .then(async (uri) => {
               if (!uri) {
                 p.webview.postMessage({ type: 'saveError', message: 'Save canceled' });
                 return;
               }
               try {
-                writeSerializedBlobToFile(data.serializedBlob, uri.fsPath);
+                await writeSerializedBlobToFile(data.serializedBlob, uri);
                 p.webview.postMessage({
                   type: 'saveSuccess',
                   fileName: path.basename(uri.fsPath),
@@ -250,26 +252,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 function getHtmlContent(htmlPath: string, webview: vscode.Webview) {
   const raw = fs.readFileSync(htmlPath, 'utf-8');
-  const nonce = Math.random().toString(36).slice(2);
-  const withResources = raw
-    .replace(/script src="([^"]*)"/g, (_m, src) => {
-      const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), src));
-      const webSrc = webview.asWebviewUri(onDisk);
-      return `script nonce="${nonce}" src="${webSrc}"`;
-    })
-    .replace(/link href="([^"]*)"/g, (_m, href) => {
-      const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), href));
-      const webHref = webview.asWebviewUri(onDisk);
-      return `link href="${webHref}"`;
-    })
-    .replace(
-      /<meta\s+http-equiv="Content-Security-Policy"[^>]*content="([^"]*)"\s*\/?>/,
-      (m, csp) => {
-        let updated = csp.replace('script-src', `script-src 'nonce-${nonce}'`);
-        return m.replace(csp, updated);
-      }
-    );
-  return withResources;
+  const nonce = crypto.randomBytes(16).toString('base64');
+
+  const basePath = path.dirname(htmlPath);
+  const stylesUri = webview.asWebviewUri(vscode.Uri.file(path.resolve(basePath, 'styles.css')));
+  const htmlToImageUri = webview.asWebviewUri(
+    vscode.Uri.file(path.resolve(basePath, 'html-to-image.js'))
+  );
+  const indexUri = webview.asWebviewUri(vscode.Uri.file(path.resolve(basePath, 'index.js')));
+
+  return raw
+    .replace(/{{nonce}}/g, nonce)
+    .replace('{{stylesUri}}', stylesUri.toString())
+    .replace('{{htmlToImageUri}}', htmlToImageUri.toString())
+    .replace('{{indexUri}}', indexUri.toString());
 }
 
 export function deactivate() {}

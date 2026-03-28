@@ -2,9 +2,9 @@
   <head>
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; img-src https: data: vscode-webview-resource:; script-src vscode-webview-resource:; style-src 'unsafe-inline' vscode-webview-resource:;"
+      content="default-src 'none'; img-src https: data: vscode-webview-resource:; script-src 'nonce-{{nonce}}' vscode-webview-resource:; style-src 'unsafe-inline' vscode-webview-resource:;"
     />
-    <link href="./styles.css" rel="stylesheet" />
+    <link href="{{stylesUri}}" rel="stylesheet" />
   </head>
   <body>
     <div class="toolbar">
@@ -92,7 +92,7 @@
       </button>
     </div>
 
-    <script src="./dom2image.js"></script>
-    <script src="./index.js"></script>
+    <script nonce="{{nonce}}" src="{{htmlToImageUri}}"></script>
+    <script nonce="{{nonce}}" src="{{indexUri}}"></script>
   </body>
 </html>
