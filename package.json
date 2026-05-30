@@ -112,6 +112,11 @@
           "type": "string",
           "description": "Text to display as attribution on screenshots",
           "default": "Created with SnippetShot"
+        },
+        "snippetshot.windowControlsEnabled": {
+          "type": "boolean",
+          "description": "Enable macOS style window controls (traffic lights) on screenshots",
+          "default": true
         }
       }
     }

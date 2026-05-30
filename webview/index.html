@@ -21,57 +21,46 @@
         <input type="checkbox" id="attributionEnabled" />
         <input type="text" id="attributionText" placeholder="Enter attribution text" />
       </label>
+      <label for="windowControls" title="Show window controls">
+        Window controls
+        <input type="checkbox" id="windowControls" checked />
+      </label>
     </div>
     <div id="snippet-container" class="snippet-container">
-      <div id="snippet"></div>
-      <div id="attribution-overlay" class="attribution-overlay"></div>
+      <div class="snippet-window">
+        <div class="mac-traffic-lights">
+          <div class="mac-traffic-light mac-traffic-light-close"></div>
+          <div class="mac-traffic-light mac-traffic-light-minimize"></div>
+          <div class="mac-traffic-light mac-traffic-light-maximize"></div>
+        </div>
+        <div id="snippet"></div>
+        <div id="attribution-overlay" class="attribution-overlay"></div>
+      </div>
     </div>
 
     <template id="initial-snippet-template">
       <meta charset="utf-8" />
       <div class="snippet-initial">
-        <div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div>
-        <div class="snippet-initial-step snippet-initial-step--first">
-          <span class="snippet-initial-step">1. Copy some code from your editor.</span>
+        <div class="snippet-initial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <path d="M3 9h18M9 21V9"></path>
+          </svg>
         </div>
-        <div><span class="snippet-initial-step">2. Paste it here.</span></div>
-        <div>
-          <span class="snippet-initial-step">3. Click 📸 to save (Ctrl+S).</span>
-        </div>
+        <div class="snippet-initial-title">Ready for a beautiful snippet?</div>
+        <div class="snippet-initial-step">1. Copy some code from your editor</div>
+        <div class="snippet-initial-step">2. Click here and paste (Ctrl+V)</div>
+        <div class="snippet-initial-step">3. Save or Copy to clipboard</div>
       </div>
     </template>
 
     <div id="save-container">
       <button id="saveBtn" class="btn" aria-label="Save screenshot">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path
-            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h8l2 3h3a2 2 0 0 1 2 2z"
-          />
-          <circle cx="12" cy="13" r="4" />
-        </svg>
-        <span id="saveBtnText">Save as PNG</span>
+        <span id="saveBtnText">Save</span>
       </button>
 
-      <button
-        id="shareBtn"
-        class="btn btn-share"
-        aria-label="Share to Twitter/X"
-        title="Share to Twitter/X - copies image to clipboard for easy pasting"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path
-            d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-          />
-        </svg>
-        <span id="shareBtnText">Share to X</span>
+      <button id="copyBtn" class="btn btn-copy" aria-label="Copy to clipboard">
+        <span id="copyBtnText">Copy</span>
       </button>
     </div>
 

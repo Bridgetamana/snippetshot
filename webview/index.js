@@ -9,10 +9,11 @@ import * as htmlToImage from 'html-to-image';
   const snippetContainerNode = document.getElementById('snippet-container');
   const saveBtn = document.getElementById('saveBtn');
   const saveBtnText = document.getElementById('saveBtnText');
-  const shareBtn = document.getElementById('shareBtn');
-  const shareBtnText = document.getElementById('shareBtnText');
+  const copyBtn = document.getElementById('copyBtn');
+  const copyBtnText = document.getElementById('copyBtnText');
   const bgPicker = document.getElementById('bgPicker');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
+  const windowControlsCheckbox = document.getElementById('windowControls');
   const attributionEnabled = document.getElementById('attributionEnabled');
   const attributionText = document.getElementById('attributionText');
   const attributionOverlay = document.getElementById('attribution-overlay');
@@ -42,7 +43,7 @@ import * as htmlToImage from 'html-to-image';
 
     fileReader.onerror = () => {
       saveBtn.disabled = false;
-      saveBtnText.textContent = 'Save as PNG';
+      saveBtnText.textContent = 'Save';
     };
 
     fileReader.readAsArrayBuffer(blob);
@@ -132,6 +133,21 @@ import * as htmlToImage from 'html-to-image';
   lineNumbersCheckbox.addEventListener('change', () => {
     toggleLineNumbers(lineNumbersCheckbox.checked);
   });
+
+  windowControlsCheckbox.addEventListener('change', () => {
+    toggleWindowControls(windowControlsCheckbox.checked);
+    vscode.postMessage({
+      type: 'updateWindowControls',
+      data: { enabled: windowControlsCheckbox.checked },
+    });
+  });
+
+  function toggleWindowControls(show) {
+    const lights = document.querySelector('.mac-traffic-lights');
+    if (lights) {
+      lights.style.display = show ? 'flex' : 'none';
+    }
+  }
 
   function toggleLineNumbers(show) {
     const snippet = document.getElementById('snippet');
@@ -265,9 +281,9 @@ import * as htmlToImage from 'html-to-image';
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (e.shiftKey) {
-          // Ctrl+Shift+S (Cmd+Shift+S) for share
-          if (!shareBtn.disabled) {
-            shareBtn.click();
+          // Ctrl+Shift+S (Cmd+Shift+S) for copy
+          if (!copyBtn.disabled) {
+            copyBtn.click();
           }
         } else {
           // Ctrl+S (Cmd+S) for save
@@ -291,15 +307,15 @@ import * as htmlToImage from 'html-to-image';
   });
 
   function copyScreenshotToClipboard() {
-    if (saveBtn.disabled) return;
+    if (copyBtn.disabled) return;
 
-    saveBtn.disabled = true;
-    saveBtnText.textContent = 'Copying…';
+    copyBtn.disabled = true;
+    copyBtnText.textContent = 'Copying…';
 
     const safetyTimeout = setTimeout(() => {
-      if (saveBtn.disabled) {
-        saveBtn.disabled = false;
-        saveBtnText.textContent = 'Save as PNG';
+      if (copyBtn.disabled) {
+        copyBtn.disabled = false;
+        copyBtnText.textContent = 'Copy';
         vscode.postMessage({
           type: 'copyError',
           message: 'Copy operation timed out. Please try again.',
@@ -321,13 +337,13 @@ import * as htmlToImage from 'html-to-image';
         clearTimeout(safetyTimeout);
         if (blob) {
           if (!navigator.clipboard || !window.ClipboardItem) {
-            saveBtnText.textContent = 'Save as PNG';
+            copyBtnText.textContent = 'Copy';
             vscode.postMessage({
               type: 'copyError',
               message: 'Clipboard API not supported. Try saving as file instead.',
             });
             restore();
-            saveBtn.disabled = false;
+            copyBtn.disabled = false;
             return;
           }
           navigator.clipboard
@@ -337,9 +353,9 @@ import * as htmlToImage from 'html-to-image';
               }),
             ])
             .then(() => {
-              saveBtnText.textContent = 'Copied!';
+              copyBtnText.textContent = 'Copied!';
               setTimeout(() => {
-                saveBtnText.textContent = 'Save as PNG';
+                copyBtnText.textContent = 'Copy';
               }, 2000);
               vscode.postMessage({
                 type: 'copySuccess',
@@ -347,7 +363,7 @@ import * as htmlToImage from 'html-to-image';
               });
             })
             .catch((_error) => {
-              saveBtnText.textContent = 'Save as PNG';
+              copyBtnText.textContent = 'Copy';
               vscode.postMessage({
                 type: 'copyError',
                 message: 'Failed to copy to clipboard. Try saving as file instead.',
@@ -355,7 +371,7 @@ import * as htmlToImage from 'html-to-image';
             })
             .finally(() => {
               restore();
-              saveBtn.disabled = false;
+              copyBtn.disabled = false;
             });
         } else {
           throw new Error('Failed to generate image blob');
@@ -364,8 +380,8 @@ import * as htmlToImage from 'html-to-image';
       .catch((error) => {
         clearTimeout(safetyTimeout);
         restore();
-        saveBtn.disabled = false;
-        saveBtnText.textContent = 'Save as PNG';
+        copyBtn.disabled = false;
+        copyBtnText.textContent = 'Copy';
         vscode.postMessage({
           type: 'copyError',
           message: `Copy failed: ${error.message || 'Unknown error'}`,
@@ -378,119 +394,9 @@ import * as htmlToImage from 'html-to-image';
     shootAll();
   });
 
-  shareBtn.addEventListener('click', () => {
-    shareToTwitter();
+  copyBtn.addEventListener('click', () => {
+    copyScreenshotToClipboard();
   });
-
-  function shareToTwitter() {
-    if (shareBtn.disabled || saveBtn.disabled) return;
-
-    shareBtn.disabled = true;
-    shareBtnText.textContent = 'Generating…';
-
-    const safetyTimeout = setTimeout(() => {
-      if (shareBtn.disabled) {
-        shareBtn.disabled = false;
-        shareBtnText.textContent = 'Share to X';
-        vscode.postMessage({
-          type: 'shareError',
-          message: 'Share operation timed out. Please try again.',
-        });
-      }
-    }, 30000);
-
-    const restore = applyExportStyles();
-    const config = {
-      backgroundColor: backgroundColor,
-      filter: (node) => {
-        return !node.classList || !node.classList.contains('toolbar');
-      },
-    };
-
-    const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
-    if (target && target.classList) target.classList.remove('capture-flash');
-
-    htmlToImage
-      .toBlob(target, config)
-      .then((blob) => {
-        clearTimeout(safetyTimeout);
-        if (target && target.classList) {
-          void target.offsetWidth;
-          target.classList.add('capture-flash');
-        }
-        if (blob) {
-          if (navigator.clipboard && window.ClipboardItem) {
-            navigator.clipboard
-              .write([
-                new ClipboardItem({
-                  'image/png': blob,
-                }),
-              ])
-              .then(() => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  const base64 = reader.result.split(',')[1];
-                  vscode.postMessage({
-                    type: 'shareToTwitter',
-                    data: {
-                      imageData: base64,
-                      text: 'Check out this code snippet! Created with #SnippetShot 📸',
-                      imageCopiedToClipboard: true,
-                    },
-                  });
-                };
-                reader.readAsDataURL(blob);
-              })
-              .catch(() => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  const base64 = reader.result.split(',')[1];
-                  vscode.postMessage({
-                    type: 'shareToTwitter',
-                    data: {
-                      imageData: base64,
-                      text: 'Check out this code snippet! Created with #SnippetShot 📸',
-                      imageCopiedToClipboard: false,
-                    },
-                  });
-                };
-                reader.readAsDataURL(blob);
-              });
-          } else {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const base64 = reader.result.split(',')[1];
-              vscode.postMessage({
-                type: 'shareToTwitter',
-                data: {
-                  imageData: base64,
-                  text: 'Check out this code snippet! Created with #SnippetShot 📸',
-                  imageCopiedToClipboard: false,
-                },
-              });
-            };
-            reader.readAsDataURL(blob);
-          }
-        } else {
-          throw new Error('Failed to generate image blob');
-        }
-      })
-      .catch((error) => {
-        clearTimeout(safetyTimeout);
-        if (target && target.classList) target.classList.remove('capture-flash');
-        shareBtn.disabled = false;
-        shareBtnText.textContent = 'Share to X';
-
-        const errorMessage = error.message || 'Unknown error occurred';
-        vscode.postMessage({
-          type: 'shareError',
-          message: `Failed to generate image for sharing: ${errorMessage}. Please try again.`,
-        });
-      })
-      .finally(() => {
-        restore();
-      });
-  }
 
   function shootAll() {
     if (saveBtn.disabled) return;
@@ -501,7 +407,7 @@ import * as htmlToImage from 'html-to-image';
     const safetyTimeout = setTimeout(() => {
       if (saveBtn.disabled) {
         saveBtn.disabled = false;
-        saveBtnText.textContent = 'Save as PNG';
+        saveBtnText.textContent = 'Save';
         vscode.postMessage({
           type: 'exportError',
           message: 'Screenshot capture timed out. Please try again.',
@@ -540,7 +446,7 @@ import * as htmlToImage from 'html-to-image';
         clearTimeout(safetyTimeout);
         if (target && target.classList) target.classList.remove('capture-flash');
         saveBtn.disabled = false;
-        saveBtnText.textContent = 'Save as PNG';
+        saveBtnText.textContent = 'Save';
 
         const errorMessage = error.message || 'Unknown error occurred';
         vscode.postMessage({
@@ -581,6 +487,10 @@ import * as htmlToImage from 'html-to-image';
         if (e.data.attributionEnabled !== undefined) {
           attributionEnabled.checked = e.data.attributionEnabled;
         }
+        if (e.data.windowControlsEnabled !== undefined) {
+          windowControlsCheckbox.checked = e.data.windowControlsEnabled;
+          toggleWindowControls(e.data.windowControlsEnabled);
+        }
         if (e.data.attributionText) {
           attributionText.value = e.data.attributionText;
         }
@@ -599,23 +509,11 @@ import * as htmlToImage from 'html-to-image';
           clearTimeout(saveLabelTimer);
         }
         saveLabelTimer = setTimeout(() => {
-          saveBtnText.textContent = 'Save as PNG';
+          saveBtnText.textContent = 'Save';
         }, 2000);
       } else if (e.data.type === 'saveError') {
-        saveBtnText.textContent = 'Save as PNG';
+        saveBtnText.textContent = 'Save';
         saveBtn.disabled = false;
-      } else if (e.data.type === 'shareSuccess') {
-        shareBtnText.textContent = 'Ready to paste!';
-        shareBtn.classList.add('ready-to-paste');
-        shareBtn.disabled = false;
-        setTimeout(() => {
-          shareBtnText.textContent = 'Share to X';
-          shareBtn.classList.remove('ready-to-paste');
-        }, 5000);
-      } else if (e.data.type === 'shareError') {
-        shareBtnText.textContent = 'Share to X';
-        shareBtn.classList.remove('ready-to-paste');
-        shareBtn.disabled = false;
       }
     }
   });
