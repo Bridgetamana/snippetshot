@@ -3,10 +3,6 @@ import * as htmlToImage from 'html-to-image';
 (function () {
   const vscode = acquireVsCodeApi();
   let backgroundColor = '#020617';
-  let backgroundType = 'solid';
-  let gradientColor1 = '#0b1220';
-  let gradientColor2 = '#1e293b';
-  let gradientDirection = 'to bottom';
 
   vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
   const snippetNode = document.getElementById('snippet');
@@ -16,12 +12,6 @@ import * as htmlToImage from 'html-to-image';
   const shareBtn = document.getElementById('shareBtn');
   const shareBtnText = document.getElementById('shareBtnText');
   const bgPicker = document.getElementById('bgPicker');
-  const bgType = document.getElementById('bgType');
-  const solidBgControls = document.getElementById('solidBgControls');
-  const gradientBgControls = document.getElementById('gradientBgControls');
-  const gradientColor1Picker = document.getElementById('gradientColor1');
-  const gradientColor2Picker = document.getElementById('gradientColor2');
-  const gradientDirectionSelect = document.getElementById('gradientDirection');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
   const attributionEnabled = document.getElementById('attributionEnabled');
   const attributionText = document.getElementById('attributionText');
@@ -32,7 +22,6 @@ import * as htmlToImage from 'html-to-image';
     snippetNode.innerHTML = oldState.innerHTML;
   }
 
-  toggleBackgroundControls();
   updateBackground();
 
   const initialTemplate = document.getElementById('initial-snippet-template');
@@ -60,13 +49,6 @@ import * as htmlToImage from 'html-to-image';
   };
 
   function getBackgroundValue() {
-    if (backgroundType === 'gradient') {
-      if (gradientDirection === 'circle') {
-        return `radial-gradient(circle, ${gradientColor1}, ${gradientColor2})`;
-      } else {
-        return `linear-gradient(${gradientDirection}, ${gradientColor1}, ${gradientColor2})`;
-      }
-    }
     return backgroundColor;
   }
 
@@ -77,22 +59,8 @@ import * as htmlToImage from 'html-to-image';
       type: 'updateBgSettings',
       data: {
         bgColor: backgroundColor,
-        backgroundType: backgroundType,
-        gradientColor1: gradientColor1,
-        gradientColor2: gradientColor2,
-        gradientDirection: gradientDirection,
       },
     });
-  }
-
-  function toggleBackgroundControls() {
-    if (backgroundType === 'solid') {
-      solidBgControls.style.display = 'flex';
-      gradientBgControls.style.display = 'none';
-    } else {
-      solidBgControls.style.display = 'none';
-      gradientBgControls.style.display = 'flex';
-    }
   }
 
   function applyExportStyles() {
@@ -137,27 +105,6 @@ import * as htmlToImage from 'html-to-image';
 
   bgPicker.addEventListener('input', () => {
     backgroundColor = bgPicker.value;
-    updateBackground();
-  });
-
-  bgType.addEventListener('change', () => {
-    backgroundType = bgType.value;
-    toggleBackgroundControls();
-    updateBackground();
-  });
-
-  gradientColor1Picker.addEventListener('input', () => {
-    gradientColor1 = gradientColor1Picker.value;
-    updateBackground();
-  });
-
-  gradientColor2Picker.addEventListener('input', () => {
-    gradientColor2 = gradientColor2Picker.value;
-    updateBackground();
-  });
-
-  gradientDirectionSelect.addEventListener('change', () => {
-    gradientDirection = gradientDirectionSelect.value;
     updateBackground();
   });
 
@@ -611,24 +558,6 @@ import * as htmlToImage from 'html-to-image';
       backgroundColor = data.bgColor;
       bgPicker.value = data.bgColor;
     }
-    const bgType = data.backgroundType || data.bgType;
-    if (bgType) {
-      backgroundType = bgType;
-      document.getElementById('bgType').value = bgType;
-    }
-    if (data.gradientColor1) {
-      gradientColor1 = data.gradientColor1;
-      gradientColor1Picker.value = data.gradientColor1;
-    }
-    if (data.gradientColor2) {
-      gradientColor2 = data.gradientColor2;
-      gradientColor2Picker.value = data.gradientColor2;
-    }
-    if (data.gradientDirection) {
-      gradientDirection = data.gradientDirection;
-      gradientDirectionSelect.value = data.gradientDirection;
-    }
-    toggleBackgroundControls();
     updateBackground();
   }
 

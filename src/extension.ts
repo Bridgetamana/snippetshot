@@ -96,10 +96,6 @@ export function activate(context: vscode.ExtensionContext) {
         type: 'restore',
         innerHTML: state?.innerHTML,
         bgColor: context.globalState.get('snippetshot.bgColor'),
-        backgroundType: context.globalState.get('snippetshot.backgroundType'),
-        gradientColor1: context.globalState.get('snippetshot.gradientColor1'),
-        gradientColor2: context.globalState.get('snippetshot.gradientColor2'),
-        gradientDirection: context.globalState.get('snippetshot.gradientDirection'),
       });
       const selectionListener = setupSelectionSync(panel);
       panel.onDidDispose(() => selectionListener.dispose());
@@ -129,18 +125,10 @@ export function activate(context: vscode.ExtensionContext) {
 
       const fontFamily = vscode.workspace.getConfiguration('editor').get<string>('fontFamily');
       const bgColor = context.globalState.get('snippetshot.bgColor');
-      const backgroundType = context.globalState.get('snippetshot.backgroundType');
-      const gradientColor1 = context.globalState.get('snippetshot.gradientColor1');
-      const gradientColor2 = context.globalState.get('snippetshot.gradientColor2');
-      const gradientDirection = context.globalState.get('snippetshot.gradientDirection');
       panel.webview.postMessage({
         type: 'init',
         fontFamily,
         bgColor,
-        backgroundType,
-        gradientColor1,
-        gradientColor2,
-        gradientDirection,
       });
 
       syncSettings(panel);
@@ -206,10 +194,6 @@ export function activate(context: vscode.ExtensionContext) {
           p.webview.postMessage({
             type: 'restoreBgColor',
             bgColor: context.globalState.get('snippetshot.bgColor'),
-            backgroundType: context.globalState.get('snippetshot.backgroundType'),
-            gradientColor1: context.globalState.get('snippetshot.gradientColor1'),
-            gradientColor2: context.globalState.get('snippetshot.gradientColor2'),
-            gradientDirection: context.globalState.get('snippetshot.gradientDirection'),
           });
           syncSettings(p);
           break;
@@ -218,10 +202,6 @@ export function activate(context: vscode.ExtensionContext) {
           break;
         case 'updateBgSettings':
           context.globalState.update('snippetshot.bgColor', data.bgColor);
-          context.globalState.update('snippetshot.backgroundType', data.backgroundType);
-          context.globalState.update('snippetshot.gradientColor1', data.gradientColor1);
-          context.globalState.update('snippetshot.gradientColor2', data.gradientColor2);
-          context.globalState.update('snippetshot.gradientDirection', data.gradientDirection);
           break;
         case 'copySuccess':
           vscode.window.showInformationMessage(data.message || 'Screenshot copied to clipboard!');

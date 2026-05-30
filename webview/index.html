@@ -8,27 +8,10 @@
   </head>
   <body>
     <div class="toolbar">
-      <label for="bgType">
+      <label for="bgPicker" title="Background Color">
         Background
-        <select id="bgType">
-          <option value="solid">Solid</option>
-          <option value="gradient">Gradient</option>
-        </select>
+        <input type="color" id="bgPicker" value="#B0D7FF" />
       </label>
-      <div id="solidBgControls" class="bg-controls">
-        <input type="color" id="bgPicker" value="#0b1220" />
-      </div>
-      <div id="gradientBgControls" class="bg-controls" style="display: none">
-        <input type="color" id="gradientColor1" value="#0b1220" title="Start color" />
-        <input type="color" id="gradientColor2" value="#1e293b" title="End color" />
-        <select id="gradientDirection" title="Gradient direction">
-          <option value="45deg">↗ Diagonal (NE)</option>
-          <option value="135deg">↘ Diagonal (SE)</option>
-          <option value="225deg">↙ Diagonal (SW)</option>
-          <option value="315deg">↖ Diagonal (NW)</option>
-          <option value="circle">⚫ Radial</option>
-        </select>
-      </div>
       <label for="lineNumbers" title="Show line numbers">
         Line numbers
         <input type="checkbox" id="lineNumbers" checked />
