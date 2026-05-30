@@ -86,7 +86,10 @@ export function activate(context: vscode.ExtensionContext) {
       panel = _panel;
       panel.webview.options = {
         enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'webview'))],
+        localResourceRoots: [
+          vscode.Uri.file(path.join(context.extensionPath, 'webview')),
+          vscode.Uri.file(path.join(context.extensionPath, 'out')),
+        ],
       };
       panel.webview.html = getHtmlContent(htmlPath, panel.webview);
       panel.webview.postMessage({
@@ -111,7 +114,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('snippetshot.activate', () => {
       panel = vscode.window.createWebviewPanel('snippetshot', P_TITLE, vscode.ViewColumn.Two, {
         enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'webview'))],
+        localResourceRoots: [
+          vscode.Uri.file(path.join(context.extensionPath, 'webview')),
+          vscode.Uri.file(path.join(context.extensionPath, 'out')),
+        ],
       });
 
       panel.webview.html = getHtmlContent(htmlPath, panel.webview);
@@ -255,16 +261,15 @@ function getHtmlContent(htmlPath: string, webview: vscode.Webview) {
   const nonce = crypto.randomBytes(16).toString('base64');
 
   const basePath = path.dirname(htmlPath);
+  const extensionPath = path.resolve(basePath, '..');
   const stylesUri = webview.asWebviewUri(vscode.Uri.file(path.resolve(basePath, 'styles.css')));
-  const htmlToImageUri = webview.asWebviewUri(
-    vscode.Uri.file(path.resolve(basePath, 'html-to-image.js'))
+  const indexUri = webview.asWebviewUri(
+    vscode.Uri.file(path.resolve(extensionPath, 'out/webview.js'))
   );
-  const indexUri = webview.asWebviewUri(vscode.Uri.file(path.resolve(basePath, 'index.js')));
 
   return raw
     .replace(/{{nonce}}/g, nonce)
     .replace('{{stylesUri}}', stylesUri.toString())
-    .replace('{{htmlToImageUri}}', htmlToImageUri.toString())
     .replace('{{indexUri}}', indexUri.toString());
 }
 

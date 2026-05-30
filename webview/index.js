@@ -1,4 +1,5 @@
-/* global htmlToImage */
+import * as htmlToImage from 'html-to-image';
+
 (function () {
   const vscode = acquireVsCodeApi();
   let backgroundColor = '#020617';

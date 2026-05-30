@@ -287,6 +287,11 @@
     "@types/conventional-commits-parser" "^5.0.0"
     chalk "^5.3.0"
 
+"@esbuild/win32-x64@0.28.0":
+  version "0.28.0"
+  resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.28.0.tgz"
+  integrity sha512-pEl1bO9mfAmIC+tW5btTmrKaujg3zGtUmWNdCw/xs70FBjwAL3o9OEKNHvNmnyylD6ubxUERiEhdsL0xBQ9efw==
+
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.7.0":
   version "4.7.0"
   resolved "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.7.0.tgz"
@@ -591,11 +596,6 @@
   integrity sha512-7uz5EHdzz2TqoMfV7ee61Egf5y6NkcO4FB/1iCCQnbeiI1F3xzv3vK5dBCXUCLQgGYS+mUeigK1iKQzvED+QnQ==
   dependencies:
     "@types/node" "*"
-
-"@types/dom-to-image@^2.6.7":
-  version "2.6.7"
-  resolved "https://registry.npmjs.org/@types/dom-to-image/-/dom-to-image-2.6.7.tgz"
-  integrity sha512-me5VbCv+fcXozblWwG13krNBvuEOm6kA5xoa4RrjDJCNFOZSWR3/QLtOXimBHk1Fisq69Gx3JtOoXtg1N1tijg==
 
 "@types/estree@^1.0.6":
   version "1.0.8"
@@ -1729,6 +1729,38 @@ es-set-tostringtag@^2.1.0:
     get-intrinsic "^1.2.6"
     has-tostringtag "^1.0.2"
     hasown "^2.0.2"
+
+esbuild@^0.28.0:
+  version "0.28.0"
+  resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.28.0.tgz"
+  integrity sha512-sNR9MHpXSUV/XB4zmsFKN+QgVG82Cc7+/aaxJ8Adi8hyOac+EXptIp45QBPaVyX3N70664wRbTcLTOemCAnyqw==
+  optionalDependencies:
+    "@esbuild/aix-ppc64" "0.28.0"
+    "@esbuild/android-arm" "0.28.0"
+    "@esbuild/android-arm64" "0.28.0"
+    "@esbuild/android-x64" "0.28.0"
+    "@esbuild/darwin-arm64" "0.28.0"
+    "@esbuild/darwin-x64" "0.28.0"
+    "@esbuild/freebsd-arm64" "0.28.0"
+    "@esbuild/freebsd-x64" "0.28.0"
+    "@esbuild/linux-arm" "0.28.0"
+    "@esbuild/linux-arm64" "0.28.0"
+    "@esbuild/linux-ia32" "0.28.0"
+    "@esbuild/linux-loong64" "0.28.0"
+    "@esbuild/linux-mips64el" "0.28.0"
+    "@esbuild/linux-ppc64" "0.28.0"
+    "@esbuild/linux-riscv64" "0.28.0"
+    "@esbuild/linux-s390x" "0.28.0"
+    "@esbuild/linux-x64" "0.28.0"
+    "@esbuild/netbsd-arm64" "0.28.0"
+    "@esbuild/netbsd-x64" "0.28.0"
+    "@esbuild/openbsd-arm64" "0.28.0"
+    "@esbuild/openbsd-x64" "0.28.0"
+    "@esbuild/openharmony-arm64" "0.28.0"
+    "@esbuild/sunos-x64" "0.28.0"
+    "@esbuild/win32-arm64" "0.28.0"
+    "@esbuild/win32-ia32" "0.28.0"
+    "@esbuild/win32-x64" "0.28.0"
 
 escalade@^3.1.1:
   version "3.2.0"
