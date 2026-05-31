@@ -18,9 +18,10 @@
   --font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', SFMono-Regular, Consolas, monospace;
   
-  --canvas-padding: 48px;
+  --canvas-padding: 32px 40px;
   --window-radius: 12px;
   --window-shadow: 0 20px 68px rgba(0, 0, 0, 0.55);
+  --code-font-size: 13px;
 }
 
 * {
@@ -68,9 +69,11 @@ body::before {
   justify-content: center;
   align-items: center;
   padding: var(--canvas-padding);
-  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 4px;
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  border-radius: 12px;
   position: relative;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .snippet-window {
@@ -91,63 +94,24 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .window-controls-mac {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mac-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 .mac-dot-close { background-color: #ff5f56; }
 .mac-dot-minimize { background-color: #ffbd2e; }
 .mac-dot-maximize { background-color: #27c93f; }
-
-.window-controls-win {
-  display: flex;
-  gap: 12px;
-  opacity: 0.7;
-}
-
-.win-btn {
-  width: 10px;
-  height: 10px;
-  border: 1px solid var(--text-muted);
-  position: relative;
-}
-.win-btn-minimize::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--text-muted);
-}
-.win-btn-maximize::after {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  border: 1px solid var(--text-muted);
-}
-.win-btn-close::after, .win-btn-close::before {
-  content: '';
-  position: absolute;
-  width: 1px;
-  height: 12px;
-  background: var(--text-muted);
-  top: -2px;
-  left: 4px;
-}
-.win-btn-close::after { transform: rotate(45deg); }
-.win-btn-close::before { transform: rotate(-45deg); }
 
 .window-title {
   font-size: 12px;
@@ -180,7 +144,7 @@ body::before {
 }
 
 .header-spacer {
-  width: 52px;
+  width: 42px;
 }
 
 #snippet {
@@ -194,8 +158,15 @@ body::before {
   background-color: transparent;
   font-family: var(--font-mono);
   font-weight: normal;
-  font-size: 13px;
   text-align: left;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  overflow: hidden;
+}
+
+#snippet,
+#snippet * {
+  font-size: var(--code-font-size) !important;
 }
 
 #snippet::-webkit-scrollbar {
@@ -242,6 +213,7 @@ body::before {
   -webkit-backdrop-filter: blur(6px);
   font-weight: 500;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .snippet-initial {
@@ -258,16 +230,6 @@ body::before {
   background: rgba(255, 255, 255, 0.01);
   max-width: 420px;
   margin: auto;
-}
-
-.snippet-initial-icon {
-  color: var(--text-muted);
-  opacity: 0.6;
-}
-
-.snippet-initial-icon svg {
-  width: 44px;
-  height: 44px;
 }
 
 .snippet-initial-title {
@@ -317,6 +279,7 @@ body::before {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
   height: 36px;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -547,44 +510,6 @@ body::before {
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.slider-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.slider-group input[type="range"] {
-  flex: 1;
-  -webkit-appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  outline: none;
-}
-
-.slider-group input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-  transition: transform 0.1s;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-.slider-group input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-.slider-value {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  min-width: 24px;
-  text-align: right;
-}
-
 .input-row {
   display: flex;
   align-items: center;
@@ -668,48 +593,60 @@ input:checked + .slider:before {
 
 .export-mode.snippet-container {
   border: none;
-  background: var(--bg);
-  padding: var(--canvas-padding);
   max-width: none;
   width: fit-content;
   height: fit-content;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
+  box-shadow: none;
 }
 
 .export-mode .snippet-window {
   margin: 0 !important;
 }
 
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  display: inline-block;
+.boop-arrow, .boop-copy, .boop-gear, .boop-palette, .boop-line {
+  transform-origin: center;
+  transform-box: fill-box;
 }
 
-.spinner-light {
-  border-color: rgba(255, 255, 255, 0.2);
-  border-top-color: #ffffff;
+@keyframes bounceArrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+.btn:hover .boop-arrow {
+  animation: bounceArrow 0.4s ease-in-out;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes shiftCopy {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -2px); }
+}
+.btn:hover .boop-copy {
+  animation: shiftCopy 0.4s ease-in-out;
 }
 
-@media (max-width: 480px) {
-  #floating-bar {
-    width: calc(100% - 24px);
-    bottom: 12px;
-    justify-content: space-between;
-  }
-  
-  #settings-popover {
-    width: calc(100% - 24px);
-    bottom: 64px;
-  }
+@keyframes spinGear {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(30deg); }
+}
+.btn:hover .boop-gear {
+  animation: spinGear 0.5s ease-in-out;
+}
+
+@keyframes wigglePalette {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(12deg); }
+}
+.btn:hover .boop-palette {
+  animation: wigglePalette 0.4s ease-in-out;
+}
+
+@keyframes bounceLine {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+}
+.btn:hover .boop-line {
+  animation: bounceLine 0.4s ease-in-out;
 }

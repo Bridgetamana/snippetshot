@@ -12,16 +12,10 @@
       <div id="snippet-container" class="snippet-container">
         <div class="snippet-window">
           <div class="window-header">
-            <!-- Mac window controls -->
             <div id="window-controls-mac" class="window-controls-mac">
               <div class="mac-dot mac-dot-close"></div>
               <div class="mac-dot mac-dot-minimize"></div>
               <div class="mac-dot mac-dot-maximize"></div>
-            </div>
-            <div id="window-controls-win" class="window-controls-win" style="display: none">
-              <div class="win-btn win-btn-minimize" title="Minimize"></div>
-              <div class="win-btn win-btn-maximize" title="Maximize"></div>
-              <div class="win-btn win-btn-close" title="Close"></div>
             </div>
             <div
               id="window-title"
@@ -42,19 +36,6 @@
 
     <template id="initial-snippet-template">
       <div class="snippet-initial">
-        <div class="snippet-initial-icon">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <path d="M9 3v18M3 9h18"></path>
-          </svg>
-        </div>
         <div class="snippet-initial-title">Ready for a beautiful snippet?</div>
         <div class="snippet-initial-step">1. Copy some code from your editor</div>
         <div class="snippet-initial-step">2. Click here and paste (Ctrl+V or Cmd+V)</div>
@@ -65,69 +46,131 @@
     <div id="floating-bar">
       <button id="quickBgBtn" class="btn btn-icon" title="Cycle Background Presets">
         <svg
+          class="boop-palette"
+          xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          color="currentColor"
           fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
         >
-          <circle cx="12" cy="12" r="10"></circle>
           <path
-            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C12.8417 22 14 22.1163 14 21C14 20.391 13.6832 19.9212 13.3686 19.4544C12.9082 18.7715 12.4523 18.0953 13 17C13.6667 15.6667 14.7778 15.6667 16.4815 15.6667C17.3334 15.6667 18.3334 15.6667 19.5 15.5C21.601 15.1999 22 13.9084 22 12Z"
+            stroke="currentColor"
+            stroke-width="1.5"
           ></path>
-          <path d="M2 12h20"></path>
+          <circle cx="9.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="1.5"></circle>
+          <circle cx="16.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.5"></circle>
+          <path
+            d="M7.125 15H7M7.25 15C7.25 15.1381 7.13807 15.25 7 15.25C6.86193 15.25 6.75 15.1381 6.75 15C6.75 14.8619 6.86193 14.75 7 14.75C7.13807 14.75 7.25 14.8619 7.25 15Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
         </svg>
       </button>
 
       <button id="lineNoBtn" class="btn btn-icon" title="Toggle Line Numbers">
         <svg
+          xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          color="currentColor"
           fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
         >
-          <line x1="10" y1="6" x2="21" y2="6"></line>
-          <line x1="10" y1="12" x2="21" y2="12"></line>
-          <line x1="10" y1="18" x2="21" y2="18"></line>
-          <path d="M3 6h1v4"></path>
-          <path d="M4 10h-2"></path>
-          <path d="M2 14h3v2.5a1.5 1.5 0 0 1-3 0v-.5"></path>
+          <path
+            d="M11 6L21 6"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+          <path
+            d="M11 12L21 12"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+          <path
+            d="M11 18L21 18"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+          <path
+            class="boop-line"
+            d="M3 15H4.5C4.77879 15 4.91819 15 5.03411 15.0231C5.51014 15.1177 5.88225 15.4899 5.97694 15.9659C6 16.0818 6 16.2212 6 16.5C6 16.7788 6 16.9182 5.97694 17.0341C5.88225 17.5101 5.51014 17.8823 5.03411 17.9769C4.91819 18 4.77879 18 4.5 18C4.22121 18 4.08181 18 3.96589 18.0231C3.48986 18.1177 3.11775 18.4899 3.02306 18.9659C3 19.0818 3 19.2212 3 19.5V20.4C3 20.6828 3 20.8243 3.08787 20.9121C3.17574 21 3.31716 21 3.6 21H6"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+          <path
+            class="boop-line"
+            d="M3 3H4.2C4.36569 3 4.5 3.13431 4.5 3.3V9M4.5 9H3M4.5 9H6"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
         </svg>
       </button>
 
       <div class="divider"></div>
 
-      <!-- Copy to Clipboard -->
       <button id="copyBtn" class="btn btn-secondary" aria-label="Copy code snapshot to clipboard">
         <svg
+          xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          color="currentColor"
           fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
         >
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          <path
+            class="boop-copy"
+            d="M7 11V9C7 5.70017 7 4.05025 8.02513 3.02513C9.05025 2 10.7002 2 14 2C17.2998 2 18.9497 2 19.9749 3.02513C21 4.05025 21 5.70017 21 9V11C21 14.2998 21 15.9497 19.9749 16.9749C18.9497 18 17.2998 18 14 18C10.7002 18 9.05025 18 8.02513 16.9749C7 15.9497 7 14.2998 7 11Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+          <path
+            d="M3 6V15C3 18.2998 3 19.9497 4.02513 20.9749C5.05025 22 6.70017 22 10 22H17"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
         </svg>
         <span id="copyBtnText">Copy</span>
       </button>
 
       <button id="saveBtn" class="btn btn-primary" aria-label="Save screenshot image">
         <svg
+          xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          color="currentColor"
           fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
         >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
+          <path
+            d="M2.99969 17.0002C2.99969 17.9302 2.99969 18.3952 3.10192 18.7767C3.37932 19.8119 4.18796 20.6206 5.22324 20.898C5.60474 21.0002 6.06972 21.0002 6.99969 21.0002L16.9997 21.0002C17.9297 21.0002 18.3947 21.0002 18.7762 20.898C19.8114 20.6206 20.6201 19.8119 20.8975 18.7767C20.9997 18.3952 20.9997 17.9302 20.9997 17.0002"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+          <path
+            class="boop-arrow"
+            d="M16.4998 11.5002C16.4998 11.5002 13.1856 16.0002 11.9997 16.0002C10.8139 16.0002 7.49976 11.5002 7.49976 11.5002M11.9997 15.0002V3.00016"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
         </svg>
         <span id="saveBtnText">Save</span>
       </button>
@@ -136,22 +179,21 @@
 
       <button id="settingsBtn" class="btn btn-icon" title="Customize Mockup Options">
         <svg
+          xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          color="currentColor"
           fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
         >
-          <line x1="4" y1="21" x2="4" y2="14"></line>
-          <line x1="4" y1="10" x2="4" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12" y2="3"></line>
-          <line x1="20" y1="21" x2="20" y2="16"></line>
-          <line x1="20" y1="12" x2="20" y2="3"></line>
-          <line x1="1" y1="14" x2="7" y2="14"></line>
-          <line x1="9" y1="8" x2="15" y2="8"></line>
-          <line x1="17" y1="16" x2="23" y2="16"></line>
+          <path
+            class="boop-gear"
+            d="M12 11.5V12M18 12V11.5M6 11.5V12M12 5.49999V5.99999M18 5.49999V5.99999M6 5.49999V5.99999M12 17.5V18M18 17.5V18M6 17.5V18M12.5 11L11.5 11C11.2239 11 11 11.2239 11 11.5V12.5C11 12.7761 11.2239 13 11.5 13H12.5C12.7761 13 13 12.7761 13 12.5V11.5C13 11.2239 12.7761 11 12.5 11ZM18.5 11L17.5 11C17.2239 11 17 11.2239 17 11.5V12.5C17 12.7761 17.2239 13 17.5 13H18.5C18.7761 13 19 12.7761 19 12.5V11.5C19 11.2239 18.7761 11 18.5 11ZM6.50001 11L5.50001 11C5.22386 11 5 11.2239 5 11.5V12.5C5 12.7761 5.22386 13 5.5 13H6.5C6.77614 13 7 12.7761 7 12.5V11.5C7 11.2239 6.77615 11 6.50001 11ZM12.5 5.00001L11.5 5C11.2239 5 11 5.22386 11 5.5V6.49999C11 6.77614 11.2239 6.99999 11.5 6.99999H12.5C12.7761 6.99999 13 6.77614 13 6.49999V5.50001C13 5.22387 12.7761 5.00001 12.5 5.00001ZM18.5 5.00001L17.5 5C17.2239 5 17 5.22386 17 5.5V6.49999C17 6.77614 17.2239 6.99999 17.5 6.99999H18.5C18.7761 6.99999 19 6.77614 19 6.49999V5.50001C19 5.22387 18.7761 5.00001 18.5 5.00001ZM6.50001 5.00001L5.50001 5C5.22386 5 5 5.22386 5 5.5V6.49999C5 6.77614 5.22386 6.99999 5.5 6.99999H6.5C6.77614 6.99999 7 6.77614 7 6.49999V5.50001C7 5.22387 6.77615 5.00001 6.50001 5.00001ZM12.5 17L11.5 17C11.2239 17 11 17.2239 11 17.5V18.5C11 18.7761 11.2239 19 11.5 19H12.5C12.7761 19 13 18.7761 13 18.5V17.5C13 17.2239 12.7761 17 12.5 17ZM18.5 17L17.5 17C17.2239 17 17 17.2239 17 17.5V18.5C17 18.7761 17.2239 19 17.5 19H18.5C18.7761 19 19 18.7761 19 18.5V17.5C19 17.2239 18.7761 17 18.5 17ZM6.50001 17L5.50001 17C5.22386 17 5 17.2239 5 17.5V18.5C5 18.7761 5.22386 19 5.5 19H6.5C6.77614 19 7 18.7761 7 18.5V17.5C7 17.2239 6.77615 17 6.50001 17Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
         </svg>
       </button>
     </div>
@@ -196,7 +238,6 @@
         <div class="settings-label">Window Controls</div>
         <div class="segmented-control" id="win-style-controls">
           <button class="segment-btn active" data-val="mac">macOS</button>
-          <button class="segment-btn" data-val="win">Windows</button>
           <button class="segment-btn" data-val="none">None</button>
         </div>
       </div>
@@ -207,16 +248,6 @@
           <button class="segment-btn" data-val="none">None</button>
           <button class="segment-btn" data-val="soft">Soft</button>
           <button class="segment-btn active" data-val="medium">Medium</button>
-          <button class="segment-btn" data-val="hard">Hard</button>
-          <button class="segment-btn" data-val="glow">Glow</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-label">Code Text Size</div>
-        <div class="slider-group">
-          <input type="range" id="fontSizeSlider" min="11" max="22" value="13" />
-          <span class="slider-value" id="fontSizeValue">13px</span>
         </div>
       </div>
 
@@ -235,15 +266,6 @@
           placeholder="SnippetShot"
           style="width: 100%; display: none"
         />
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-label">Export Resolution</div>
-        <div class="segmented-control" id="resolution-controls">
-          <button class="segment-btn" data-val="1">1x Standard</button>
-          <button class="segment-btn active" data-val="2">2x Retina</button>
-          <button class="segment-btn" data-val="3">3x Ultra</button>
-        </div>
       </div>
     </div>
 

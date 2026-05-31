@@ -16,8 +16,9 @@ import * as htmlToImage from 'html-to-image';
   };
 
   let backgroundColor = bgPresets.sunset;
-  let exportPixelRatio = 2;
+  const exportPixelRatio = 2;
   let lineNumbersEnabled = true;
+  let saveLabelTimer = null;
 
   const snippetNode = document.getElementById('snippet');
   const snippetContainerNode = document.getElementById('snippet-container');
@@ -37,10 +38,6 @@ import * as htmlToImage from 'html-to-image';
   const attributionEnabled = document.getElementById('attributionEnabled');
   const attributionText = document.getElementById('attributionText');
   const attributionOverlay = document.getElementById('attribution-overlay');
-
-  const fontSizeSlider = document.getElementById('fontSizeSlider');
-  const fontSizeValue = document.getElementById('fontSizeValue');
-
   lineNoBtn.classList.add('active');
 
   const oldState = vscode.getState();
@@ -76,7 +73,9 @@ import * as htmlToImage from 'html-to-image';
   function applyBackground(val) {
     if (!val) return;
     backgroundColor = val;
-    document.body.style.background = val;
+    if (snippetContainerNode) {
+      snippetContainerNode.style.background = val;
+    }
 
     if (val.startsWith('#')) {
       bgPicker.value = val;
@@ -105,7 +104,6 @@ import * as htmlToImage from 'html-to-image';
   function applyExportStyles() {
     if (snippetContainerNode) {
       snippetContainerNode.classList.add('export-mode');
-      snippetContainerNode.style.background = backgroundColor;
     }
     if (snippetNode) {
       snippetNode.classList.add('export-mode');
@@ -114,7 +112,6 @@ import * as htmlToImage from 'html-to-image';
     return function restore() {
       if (snippetContainerNode) {
         snippetContainerNode.classList.remove('export-mode');
-        snippetContainerNode.style.background = '';
       }
       if (snippetNode) {
         snippetNode.classList.remove('export-mode');
@@ -139,6 +136,7 @@ import * as htmlToImage from 'html-to-image';
     if (currentIndex === -1) currentIndex = 0;
     const nextIndex = (currentIndex + 1) % presetKeys.length;
     const nextKey = presetKeys[nextIndex];
+
     document.querySelectorAll('.preset-circle').forEach((circle) => {
       const active = circle.dataset.bg === nextKey;
       circle.classList.toggle('active', active);
@@ -203,18 +201,11 @@ import * as htmlToImage from 'html-to-image';
 
       const winStyle = btn.dataset.val;
       const macControls = document.getElementById('window-controls-mac');
-      const winControls = document.getElementById('window-controls-win');
 
       if (winStyle === 'mac') {
         macControls.style.display = 'flex';
-        winControls.style.display = 'none';
-      } else if (winStyle === 'win') {
-        macControls.style.display = 'none';
-        winControls.style.display = 'flex';
       } else {
         macControls.style.display = 'none';
-        macControls.style.display = 'none';
-        winControls.style.display = 'none';
       }
 
       vscode.postMessage({
@@ -228,8 +219,6 @@ import * as htmlToImage from 'html-to-image';
     none: 'none',
     soft: '0 8px 30px rgba(0, 0, 0, 0.12)',
     medium: '0 20px 68px rgba(0, 0, 0, 0.55)',
-    hard: '0 30px 100px rgba(0, 0, 0, 0.8)',
-    glow: '0 0 40px rgba(176, 215, 255, 0.45)',
   };
 
   document.querySelectorAll('#shadow-controls .segment-btn').forEach((btn) => {
@@ -239,24 +228,6 @@ import * as htmlToImage from 'html-to-image';
         .forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       document.documentElement.style.setProperty('--window-shadow', shadowValues[btn.dataset.val]);
-    });
-  });
-
-  fontSizeSlider.addEventListener('input', () => {
-    const size = fontSizeSlider.value;
-    fontSizeValue.textContent = `${size}px`;
-    if (snippetNode) {
-      snippetNode.style.fontSize = `${size}px`;
-    }
-  });
-
-  document.querySelectorAll('#resolution-controls .segment-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document
-        .querySelectorAll('#resolution-controls .segment-btn')
-        .forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      exportPixelRatio = Number(btn.dataset.val);
     });
   });
 
@@ -435,6 +406,7 @@ import * as htmlToImage from 'html-to-image';
     }
 
     snippetNode.innerHTML = content;
+
     vscode.setState({
       innerHTML: content,
       windowTitle: windowTitle.textContent,
@@ -477,7 +449,7 @@ import * as htmlToImage from 'html-to-image';
     if (copyBtn.disabled) return;
 
     copyBtn.disabled = true;
-    copyBtnText.innerHTML = '<span class="spinner spinner-light"></span> Copying';
+    copyBtnText.textContent = 'Copying';
 
     const safetyTimeout = setTimeout(() => {
       if (copyBtn.disabled) {
@@ -565,7 +537,6 @@ import * as htmlToImage from 'html-to-image';
       });
   }
 
-  let saveLabelTimer = null;
   saveBtn.addEventListener('click', () => {
     shootAll();
   });
@@ -577,7 +548,7 @@ import * as htmlToImage from 'html-to-image';
   function shootAll() {
     if (saveBtn.disabled) return;
 
-    saveBtnText.innerHTML = '<span class="spinner"></span> Saving';
+    saveBtnText.textContent = 'Saving';
     saveBtn.disabled = true;
 
     const safetyTimeout = setTimeout(() => {
@@ -716,13 +687,10 @@ import * as htmlToImage from 'html-to-image';
         });
 
         const macControls = document.getElementById('window-controls-mac');
-        const winControls = document.getElementById('window-controls-win');
         if (windowControlsEnabled) {
           macControls.style.display = 'flex';
-          winControls.style.display = 'none';
         } else {
           macControls.style.display = 'none';
-          winControls.style.display = 'none';
         }
       }
 
