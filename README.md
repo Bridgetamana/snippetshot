@@ -1,5 +1,4 @@
-# SnippetShot 📸
-![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/Bridget.snippetshot)
+# SnippetShot 
 
 SnippetShot is a VS Code extension that lets you turn code snippets into stunning shareable images instantly.
 
@@ -7,7 +6,7 @@ SnippetShot is a VS Code extension that lets you turn code snippets into stunnin
 
 ## Getting Started
 
-1. Open SnippetShot: Command Palette → `SnippetShot`
+1. Open SnippetShot: Command Palette `SnippetShot`
 2. Selecting automatically copies and the panel listens for paste.
 3. Paste (if needed): Click into the panel and press Ctrl+V.
 4. Change background, toggle line numbers, set attribution text.
