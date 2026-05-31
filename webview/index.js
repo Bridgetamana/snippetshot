@@ -2,28 +2,56 @@ import * as htmlToImage from 'html-to-image';
 
 (function () {
   const vscode = acquireVsCodeApi();
-  let backgroundColor = '#020617';
+  const bgPresets = {
+    sunset: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)',
+    ocean: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+    cyber: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    aurora: 'linear-gradient(135deg, #ff758c 0%, #ff7c00 100%)',
+    emerald: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    dark: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+    candy: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+    royal: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    citrus: 'linear-gradient(135deg, #fddb92 0%, #d1f2a5 100%)',
+    glass: 'rgba(255, 255, 255, 0.08)',
+  };
 
-  vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
+  let backgroundColor = bgPresets.sunset;
+  let exportPixelRatio = 2;
+  let lineNumbersEnabled = true;
+
   const snippetNode = document.getElementById('snippet');
   const snippetContainerNode = document.getElementById('snippet-container');
   const saveBtn = document.getElementById('saveBtn');
   const saveBtnText = document.getElementById('saveBtnText');
   const copyBtn = document.getElementById('copyBtn');
   const copyBtnText = document.getElementById('copyBtnText');
+
+  const quickBgBtn = document.getElementById('quickBgBtn');
+  const lineNoBtn = document.getElementById('lineNoBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPopover = document.getElementById('settings-popover');
+
   const bgPicker = document.getElementById('bgPicker');
-  const lineNumbersCheckbox = document.getElementById('lineNumbers');
-  const windowControlsCheckbox = document.getElementById('windowControls');
+  const bgHex = document.getElementById('bgHex');
+  const windowTitle = document.getElementById('window-title');
   const attributionEnabled = document.getElementById('attributionEnabled');
   const attributionText = document.getElementById('attributionText');
   const attributionOverlay = document.getElementById('attribution-overlay');
+
+  const fontSizeSlider = document.getElementById('fontSizeSlider');
+  const fontSizeValue = document.getElementById('fontSizeValue');
+
+  lineNoBtn.classList.add('active');
 
   const oldState = vscode.getState();
   if (oldState && oldState.innerHTML) {
     snippetNode.innerHTML = oldState.innerHTML;
   }
+  if (oldState && oldState.windowTitle) {
+    windowTitle.textContent = oldState.windowTitle;
+  }
 
-  updateBackground();
+  vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
 
   const initialTemplate = document.getElementById('initial-snippet-template');
   function applyInitialSnippet() {
@@ -35,27 +63,37 @@ import * as htmlToImage from 'html-to-image';
 
   const serializeBlob = (blob, cb) => {
     const fileReader = new FileReader();
-
     fileReader.onload = () => {
       const bytes = new Uint8Array(fileReader.result);
       cb(Array.from(bytes).join(','));
     };
-
     fileReader.onerror = () => {
-      saveBtn.disabled = false;
-      saveBtnText.textContent = 'Save';
+      resetExportButtons();
     };
-
     fileReader.readAsArrayBuffer(blob);
   };
 
-  function getBackgroundValue() {
-    return backgroundColor;
-  }
+  function applyBackground(val) {
+    if (!val) return;
+    backgroundColor = val;
+    document.body.style.background = val;
 
-  function updateBackground() {
-    const bgValue = getBackgroundValue();
-    document.body.style.background = bgValue;
+    if (val.startsWith('#')) {
+      bgPicker.value = val;
+      bgHex.textContent = val.toUpperCase();
+    } else {
+      let matchingKey = null;
+      for (const [key, value] of Object.entries(bgPresets)) {
+        if (value === val) {
+          matchingKey = key;
+          break;
+        }
+      }
+      bgHex.textContent = matchingKey
+        ? matchingKey.charAt(0).toUpperCase() + matchingKey.slice(1)
+        : 'Gradient';
+    }
+
     vscode.postMessage({
       type: 'updateBgSettings',
       data: {
@@ -67,7 +105,7 @@ import * as htmlToImage from 'html-to-image';
   function applyExportStyles() {
     if (snippetContainerNode) {
       snippetContainerNode.classList.add('export-mode');
-      snippetContainerNode.style.background = getBackgroundValue();
+      snippetContainerNode.style.background = backgroundColor;
     }
     if (snippetNode) {
       snippetNode.classList.add('export-mode');
@@ -84,84 +122,163 @@ import * as htmlToImage from 'html-to-image';
     };
   }
 
-  function shoot(serializedBlob) {
-    vscode.postMessage({
-      type: 'shoot',
-      data: {
-        serializedBlob,
-      },
-    });
-  }
-
   function getSnippetBgColor(html) {
     const match = html.match(/background-color: (#[a-fA-F0-9]+)/);
     return match ? match[1] : undefined;
   }
 
   function updateEnvironment(snippetBgColor) {
-    if (snippetBgColor) {
-      document.getElementById('snippet').style.backgroundColor = snippetBgColor;
+    if (snippetBgColor && snippetNode) {
+      snippetNode.style.backgroundColor = snippetBgColor;
     }
   }
 
-  bgPicker.addEventListener('input', () => {
-    backgroundColor = bgPicker.value;
-    updateBackground();
+  const presetKeys = Object.keys(bgPresets);
+  quickBgBtn.addEventListener('click', () => {
+    let currentIndex = presetKeys.findIndex((key) => bgPresets[key] === backgroundColor);
+    if (currentIndex === -1) currentIndex = 0;
+    const nextIndex = (currentIndex + 1) % presetKeys.length;
+    const nextKey = presetKeys[nextIndex];
+    document.querySelectorAll('.preset-circle').forEach((circle) => {
+      const active = circle.dataset.bg === nextKey;
+      circle.classList.toggle('active', active);
+    });
+
+    applyBackground(bgPresets[nextKey]);
   });
 
-  attributionEnabled.addEventListener('change', () => {
-    updateAttribution();
-  });
-
-  attributionText.addEventListener('input', () => {
-    updateAttribution();
-  });
-
-  attributionText.addEventListener('paste', (e) => {
-    e.stopPropagation();
-  });
-
-  function updateAttribution() {
-    if (attributionEnabled.checked) {
-      attributionOverlay.textContent = attributionText.value || 'SnippetShot';
-      attributionOverlay.style.display = 'block';
-    } else {
-      attributionOverlay.style.display = 'none';
-    }
-  }
-
-  lineNumbersCheckbox.addEventListener('change', () => {
-    toggleLineNumbers(lineNumbersCheckbox.checked);
-  });
-
-  windowControlsCheckbox.addEventListener('change', () => {
-    toggleWindowControls(windowControlsCheckbox.checked);
-    vscode.postMessage({
-      type: 'updateWindowControls',
-      data: { enabled: windowControlsCheckbox.checked },
+  document.querySelectorAll('.preset-circle').forEach((circle) => {
+    circle.addEventListener('click', () => {
+      document.querySelectorAll('.preset-circle').forEach((c) => c.classList.remove('active'));
+      circle.classList.add('active');
+      applyBackground(bgPresets[circle.dataset.bg]);
     });
   });
 
-  function toggleWindowControls(show) {
-    const lights = document.querySelector('.mac-traffic-lights');
-    if (lights) {
-      lights.style.display = show ? 'flex' : 'none';
+  bgPicker.addEventListener('input', () => {
+    document.querySelectorAll('.preset-circle').forEach((c) => c.classList.remove('active'));
+    applyBackground(bgPicker.value);
+  });
+
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = settingsPopover.classList.toggle('open');
+    settingsBtn.classList.toggle('active', isOpen);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (
+      settingsPopover.classList.contains('open') &&
+      !settingsPopover.contains(e.target) &&
+      !settingsBtn.contains(e.target)
+    ) {
+      settingsPopover.classList.remove('open');
+      settingsBtn.classList.remove('active');
     }
-  }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && settingsPopover.classList.contains('open')) {
+      settingsPopover.classList.remove('open');
+      settingsBtn.classList.remove('active');
+    }
+  });
+
+  document.querySelectorAll('#padding-controls .segment-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('#padding-controls .segment-btn')
+        .forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.documentElement.style.setProperty('--canvas-padding', btn.dataset.val);
+    });
+  });
+
+  document.querySelectorAll('#win-style-controls .segment-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('#win-style-controls .segment-btn')
+        .forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const winStyle = btn.dataset.val;
+      const macControls = document.getElementById('window-controls-mac');
+      const winControls = document.getElementById('window-controls-win');
+
+      if (winStyle === 'mac') {
+        macControls.style.display = 'flex';
+        winControls.style.display = 'none';
+      } else if (winStyle === 'win') {
+        macControls.style.display = 'none';
+        winControls.style.display = 'flex';
+      } else {
+        macControls.style.display = 'none';
+        macControls.style.display = 'none';
+        winControls.style.display = 'none';
+      }
+
+      vscode.postMessage({
+        type: 'updateWindowControls',
+        data: { enabled: winStyle !== 'none' },
+      });
+    });
+  });
+
+  const shadowValues = {
+    none: 'none',
+    soft: '0 8px 30px rgba(0, 0, 0, 0.12)',
+    medium: '0 20px 68px rgba(0, 0, 0, 0.55)',
+    hard: '0 30px 100px rgba(0, 0, 0, 0.8)',
+    glow: '0 0 40px rgba(176, 215, 255, 0.45)',
+  };
+
+  document.querySelectorAll('#shadow-controls .segment-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('#shadow-controls .segment-btn')
+        .forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.documentElement.style.setProperty('--window-shadow', shadowValues[btn.dataset.val]);
+    });
+  });
+
+  fontSizeSlider.addEventListener('input', () => {
+    const size = fontSizeSlider.value;
+    fontSizeValue.textContent = `${size}px`;
+    if (snippetNode) {
+      snippetNode.style.fontSize = `${size}px`;
+    }
+  });
+
+  document.querySelectorAll('#resolution-controls .segment-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('#resolution-controls .segment-btn')
+        .forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      exportPixelRatio = Number(btn.dataset.val);
+    });
+  });
+
+  lineNoBtn.addEventListener('click', () => {
+    lineNumbersEnabled = !lineNumbersEnabled;
+    lineNoBtn.classList.toggle('active', lineNumbersEnabled);
+    toggleLineNumbers(lineNumbersEnabled);
+  });
 
   function toggleLineNumbers(show) {
-    const snippet = document.getElementById('snippet');
-    if (!snippet) return;
+    if (!snippetNode) return;
 
-    const lineContainer = snippet.querySelector('div');
+    const lineContainer = snippetNode.querySelector('div');
     if (!lineContainer) return;
 
-    const existingNumbers = snippet.querySelectorAll('.line-number');
+    const existingNumbers = snippetNode.querySelectorAll('.line-number');
     if (show && existingNumbers.length > 0) return;
     if (!show && existingNumbers.length === 0) return;
+
     existingNumbers.forEach((n) => n.remove());
 
-    const allLines = Array.from(snippet.querySelectorAll('div > div'));
+    const allLines = Array.from(snippetNode.querySelectorAll('div > div'));
     allLines.forEach((l) => {
       l.classList.remove('line-numbered');
     });
@@ -178,9 +295,52 @@ import * as htmlToImage from 'html-to-image';
     }
   }
 
+  attributionEnabled.addEventListener('change', () => {
+    attributionText.style.display = attributionEnabled.checked ? 'block' : 'none';
+    updateAttribution();
+  });
+
+  attributionText.addEventListener('input', () => {
+    updateAttribution();
+  });
+
+  attributionText.addEventListener('paste', (e) => e.stopPropagation());
+  attributionText.addEventListener('keydown', (e) => e.stopPropagation());
+
+  function updateAttribution() {
+    if (attributionEnabled.checked) {
+      attributionOverlay.textContent = attributionText.value || 'SnippetShot';
+      attributionOverlay.style.display = 'block';
+    } else {
+      attributionOverlay.style.display = 'none';
+    }
+  }
+
+  windowTitle.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      windowTitle.blur();
+    }
+  });
+
+  windowTitle.addEventListener('blur', () => {
+    const cleanText = windowTitle.textContent.trim() || 'snippet.txt';
+    windowTitle.textContent = cleanText;
+
+    const currentState = vscode.getState() || {};
+    vscode.setState({
+      ...currentState,
+      windowTitle: cleanText,
+    });
+  });
+
+  windowTitle.addEventListener('paste', (e) => {
+    e.stopPropagation();
+  });
+
   function getMinIndent(code) {
     const arr = code.split('\n');
-
     let minIndentCount = Number.MAX_VALUE;
     for (let i = 0; i < arr.length; i++) {
       const wsCount = arr[i].search(/\S/);
@@ -190,7 +350,6 @@ import * as htmlToImage from 'html-to-image';
         }
       }
     }
-
     return minIndentCount;
   }
 
@@ -202,6 +361,7 @@ import * as htmlToImage from 'html-to-image';
     }
     return doc.body.innerHTML;
   }
+
   function createPlainTextSnippet(text) {
     const maxLineLength = 120;
     const lines = text.split('\n').map((line) => {
@@ -255,6 +415,9 @@ import * as htmlToImage from 'html-to-image';
   }
 
   document.addEventListener('paste', (e) => {
+    settingsPopover.classList.remove('open');
+    settingsBtn.classList.remove('active');
+
     const innerHTML = e.clipboardData.getData('text/html');
     const code = e.clipboardData.getData('text/plain');
 
@@ -272,8 +435,11 @@ import * as htmlToImage from 'html-to-image';
     }
 
     snippetNode.innerHTML = content;
-    vscode.setState({ innerHTML: content });
-    toggleLineNumbers(lineNumbersCheckbox.checked);
+    vscode.setState({
+      innerHTML: content,
+      windowTitle: windowTitle.textContent,
+    });
+    toggleLineNumbers(lineNumbersEnabled);
   });
 
   document.addEventListener('keydown', (e) => {
@@ -281,15 +447,9 @@ import * as htmlToImage from 'html-to-image';
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (e.shiftKey) {
-          // Ctrl+Shift+S (Cmd+Shift+S) for copy
-          if (!copyBtn.disabled) {
-            copyBtn.click();
-          }
+          if (!copyBtn.disabled) copyBtn.click();
         } else {
-          // Ctrl+S (Cmd+S) for save
-          if (!saveBtn.disabled) {
-            saveBtn.click();
-          }
+          if (!saveBtn.disabled) saveBtn.click();
         }
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         const selection = window.getSelection();
@@ -306,16 +466,22 @@ import * as htmlToImage from 'html-to-image';
     }
   });
 
+  function resetExportButtons() {
+    copyBtn.disabled = false;
+    copyBtnText.textContent = 'Copy';
+    saveBtn.disabled = false;
+    saveBtnText.textContent = 'Save';
+  }
+
   function copyScreenshotToClipboard() {
     if (copyBtn.disabled) return;
 
     copyBtn.disabled = true;
-    copyBtnText.textContent = 'Copying…';
+    copyBtnText.innerHTML = '<span class="spinner spinner-light"></span> Copying';
 
     const safetyTimeout = setTimeout(() => {
       if (copyBtn.disabled) {
-        copyBtn.disabled = false;
-        copyBtnText.textContent = 'Copy';
+        resetExportButtons();
         vscode.postMessage({
           type: 'copyError',
           message: 'Copy operation timed out. Please try again.',
@@ -324,26 +490,38 @@ import * as htmlToImage from 'html-to-image';
     }, 30000);
 
     const restore = applyExportStyles();
+
     const config = {
-      backgroundColor: backgroundColor,
+      backgroundColor: 'transparent',
+      pixelRatio: exportPixelRatio,
+      style: {
+        transform: 'scale(1)',
+        transformOrigin: 'top left',
+      },
       filter: (node) => {
-        return !node.classList || !node.classList.contains('toolbar');
+        return (
+          !node.classList ||
+          (!node.classList.contains('toolbar') &&
+            node.id !== 'floating-bar' &&
+            node.id !== 'settings-popover')
+        );
       },
     };
 
+    const target = snippetContainerNode || snippetNode.parentElement;
+
     htmlToImage
-      .toBlob(snippetContainerNode || document.querySelector('#snippet').parentElement, config)
+      .toBlob(target, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
         if (blob) {
           if (!navigator.clipboard || !window.ClipboardItem) {
-            copyBtnText.textContent = 'Copy';
             vscode.postMessage({
               type: 'copyError',
               message: 'Clipboard API not supported. Try saving as file instead.',
             });
             restore();
-            copyBtn.disabled = false;
+            resetExportButtons();
             return;
           }
           navigator.clipboard
@@ -363,7 +541,6 @@ import * as htmlToImage from 'html-to-image';
               });
             })
             .catch((_error) => {
-              copyBtnText.textContent = 'Copy';
               vscode.postMessage({
                 type: 'copyError',
                 message: 'Failed to copy to clipboard. Try saving as file instead.',
@@ -380,8 +557,7 @@ import * as htmlToImage from 'html-to-image';
       .catch((error) => {
         clearTimeout(safetyTimeout);
         restore();
-        copyBtn.disabled = false;
-        copyBtnText.textContent = 'Copy';
+        resetExportButtons();
         vscode.postMessage({
           type: 'copyError',
           message: `Copy failed: ${error.message || 'Unknown error'}`,
@@ -401,13 +577,12 @@ import * as htmlToImage from 'html-to-image';
   function shootAll() {
     if (saveBtn.disabled) return;
 
-    saveBtnText.textContent = 'Saving…';
+    saveBtnText.innerHTML = '<span class="spinner"></span> Saving';
     saveBtn.disabled = true;
 
     const safetyTimeout = setTimeout(() => {
       if (saveBtn.disabled) {
-        saveBtn.disabled = false;
-        saveBtnText.textContent = 'Save';
+        resetExportButtons();
         vscode.postMessage({
           type: 'exportError',
           message: 'Screenshot capture timed out. Please try again.',
@@ -416,14 +591,25 @@ import * as htmlToImage from 'html-to-image';
     }, 30000);
 
     const restore = applyExportStyles();
+
     const config = {
-      backgroundColor: backgroundColor,
+      backgroundColor: 'transparent',
+      pixelRatio: exportPixelRatio,
+      style: {
+        transform: 'scale(1)',
+        transformOrigin: 'top left',
+      },
       filter: (node) => {
-        return !node.classList || !node.classList.contains('toolbar');
+        return (
+          !node.classList ||
+          (!node.classList.contains('toolbar') &&
+            node.id !== 'floating-bar' &&
+            node.id !== 'settings-popover')
+        );
       },
     };
 
-    const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
+    const target = snippetContainerNode || snippetNode.parentElement;
     if (target && target.classList) target.classList.remove('capture-flash');
 
     htmlToImage
@@ -436,7 +622,12 @@ import * as htmlToImage from 'html-to-image';
         }
         if (blob) {
           serializeBlob(blob, (serializedBlob) => {
-            shoot(serializedBlob);
+            vscode.postMessage({
+              type: 'shoot',
+              data: {
+                serializedBlob,
+              },
+            });
           });
         } else {
           throw new Error('Failed to generate image blob');
@@ -445,8 +636,7 @@ import * as htmlToImage from 'html-to-image';
       .catch((error) => {
         clearTimeout(safetyTimeout);
         if (target && target.classList) target.classList.remove('capture-flash');
-        saveBtn.disabled = false;
-        saveBtnText.textContent = 'Save';
+        resetExportButtons();
 
         const errorMessage = error.message || 'Unknown error occurred';
         vscode.postMessage({
@@ -461,60 +651,107 @@ import * as htmlToImage from 'html-to-image';
 
   function updateStateUI(data) {
     if (data.bgColor) {
-      backgroundColor = data.bgColor;
-      bgPicker.value = data.bgColor;
+      applyBackground(data.bgColor);
     }
-    updateBackground();
   }
 
   window.addEventListener('message', (e) => {
-    if (e) {
-      if (e.data.type === 'init') {
-        applyInitialSnippet();
-        vscode.setState({ innerHTML: snippetNode.innerHTML });
-        toggleLineNumbers(lineNumbersCheckbox.checked);
-        updateStateUI(e.data);
-      } else if (e.data.type === 'update') {
-        document.execCommand('paste');
-      } else if (e.data.type === 'restore') {
-        snippetNode.innerHTML = e.data.innerHTML;
-        toggleLineNumbers(lineNumbersCheckbox.checked);
-        updateStateUI(e.data);
-      } else if (e.data.type === 'restoreBgColor') {
-        updateStateUI(e.data);
-      } else if (e.data.type === 'updateSettings') {
-        snippetNode.style.boxShadow = e.data.shadow;
-        if (e.data.attributionEnabled !== undefined) {
-          attributionEnabled.checked = e.data.attributionEnabled;
+    if (!e || !e.data) return;
+
+    const {
+      type,
+      innerHTML,
+      shadow,
+      attributionEnabled: attrEnabled,
+      windowControlsEnabled,
+      attributionText: attrText,
+      ligature,
+    } = e.data;
+
+    if (type === 'init') {
+      applyInitialSnippet();
+
+      const textToStore = windowTitle.textContent;
+      vscode.setState({
+        innerHTML: snippetNode.innerHTML,
+        windowTitle: textToStore,
+      });
+
+      toggleLineNumbers(lineNumbersEnabled);
+      updateStateUI(e.data);
+    } else if (type === 'update') {
+      document.execCommand('paste');
+    } else if (type === 'restore') {
+      if (innerHTML) {
+        snippetNode.innerHTML = innerHTML;
+      }
+      toggleLineNumbers(lineNumbersEnabled);
+      updateStateUI(e.data);
+    } else if (type === 'restoreBgColor') {
+      updateStateUI(e.data);
+    } else if (type === 'updateSettings') {
+      if (shadow) {
+        document.documentElement.style.setProperty('--window-shadow', shadow);
+        let matchingKey = 'medium';
+        for (const [key, value] of Object.entries(shadowValues)) {
+          if (value === shadow) {
+            matchingKey = key;
+            break;
+          }
         }
-        if (e.data.windowControlsEnabled !== undefined) {
-          windowControlsCheckbox.checked = e.data.windowControlsEnabled;
-          toggleWindowControls(e.data.windowControlsEnabled);
+        document.querySelectorAll('#shadow-controls .segment-btn').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.val === matchingKey);
+        });
+      }
+
+      if (attrEnabled !== undefined) {
+        attributionEnabled.checked = attrEnabled;
+        attributionText.style.display = attrEnabled ? 'block' : 'none';
+      }
+
+      if (windowControlsEnabled !== undefined) {
+        const styleName = windowControlsEnabled ? 'mac' : 'none';
+        document.querySelectorAll('#win-style-controls .segment-btn').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.val === styleName);
+        });
+
+        const macControls = document.getElementById('window-controls-mac');
+        const winControls = document.getElementById('window-controls-win');
+        if (windowControlsEnabled) {
+          macControls.style.display = 'flex';
+          winControls.style.display = 'none';
+        } else {
+          macControls.style.display = 'none';
+          winControls.style.display = 'none';
         }
-        if (e.data.attributionText) {
-          attributionText.value = e.data.attributionText;
-        }
-        updateAttribution();
-        if (e.data.ligature) {
+      }
+
+      if (attrText) {
+        attributionText.value = attrText;
+      }
+
+      updateAttribution();
+
+      if (snippetNode) {
+        if (ligature) {
           snippetNode.style.fontVariantLigatures = 'normal';
         } else {
           snippetNode.style.fontVariantLigatures = 'none';
         }
-      } else if (e.data.type === 'save') {
-        shootAll();
-      } else if (e.data.type === 'saveSuccess') {
-        saveBtnText.textContent = 'Saved!';
-        saveBtn.disabled = false;
-        if (saveLabelTimer) {
-          clearTimeout(saveLabelTimer);
-        }
-        saveLabelTimer = setTimeout(() => {
-          saveBtnText.textContent = 'Save';
-        }, 2000);
-      } else if (e.data.type === 'saveError') {
-        saveBtnText.textContent = 'Save';
-        saveBtn.disabled = false;
       }
+    } else if (type === 'save') {
+      shootAll();
+    } else if (type === 'saveSuccess') {
+      saveBtnText.textContent = 'Saved!';
+      saveBtn.disabled = false;
+      if (saveLabelTimer) {
+        clearTimeout(saveLabelTimer);
+      }
+      saveLabelTimer = setTimeout(() => {
+        saveBtnText.textContent = 'Save';
+      }, 2000);
+    } else if (type === 'saveError') {
+      resetExportButtons();
     }
   });
 })();

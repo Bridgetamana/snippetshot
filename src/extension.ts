@@ -22,7 +22,10 @@ export function activate(context: vscode.ExtensionContext) {
   let panel: vscode.WebviewPanel | undefined;
 
   const serializer: vscode.WebviewPanelSerializer = {
-    async deserializeWebviewPanel(_panel: vscode.WebviewPanel, state: { innerHTML?: string }) {
+    async deserializeWebviewPanel(
+      _panel: vscode.WebviewPanel,
+      state: { innerHTML?: string; windowTitle?: string }
+    ) {
       panel = _panel;
       panel.webview.options = {
         enableScripts: true,
@@ -35,6 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
       panel.webview.postMessage({
         type: 'restore',
         innerHTML: state?.innerHTML,
+        windowTitle: state?.windowTitle,
         bgColor: context.globalState.get('snippetshot.bgColor'),
       });
       const selectionListener = setupSelectionSync(panel);
