@@ -2,10 +2,7 @@
 
 SnippetShot is a VS Code extension that lets you turn code snippets into stunning shareable images instantly.
 
-<video controls width="720">
-	<source src="assets/demo.mp4" type="video/mp4">
-	Your browser does not support the video tag. You can download the demo from assets/demo.mp4.
-</video>
+![SnippetShot Demo](assets/snippetshot.png)
 
 ## Getting Started
 
