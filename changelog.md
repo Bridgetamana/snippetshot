@@ -2,8 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [1.0.0](https://github.com/Bridgetamana/SnippetShot-/compare/v0.1.3...v1.0.0) (2025-09-07)
+## [2.0.0](https://github.com/Bridgetamana/SnippetShot-/compare/v1.1.0...v2.0.0) (2026-05-31)
 
+### Features
+
+* implement esbuild for bundling and migrate to new extension structure ([f8910d2](https://github.com/Bridgetamana/SnippetShot-/commit/f8910d26425f3b33a8e9b12b2db320954c1bd479))
+* implement webview interface for code snippet ([3bd298e](https://github.com/Bridgetamana/SnippetShot-/commit/3bd298e9368fbb6df28aa1f878923e68090440cd))
+* update README and improve webview UI ([e47cb09](https://github.com/Bridgetamana/SnippetShot-/commit/e47cb09e87be760162cf1bd4bfe1f0b1f19031da))
+* update styling and layout ([c249226](https://github.com/Bridgetamana/SnippetShot-/commit/c249226a92004a0917c67863e736883307bb7248))
+
+## [1.0.0](https://github.com/Bridgetamana/SnippetShot-/compare/v0.1.3...v1.0.0) (2025-09-07)
 
 ### Features
 
@@ -14,7 +22,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### 0.1.3 (2025-09-06)
 
-
 ### Features
 
 * add auto changelog generation and CI release workflow ([7415360](https://github.com/Bridgetamana/SnippetShot-/commit/7415360ef32185cf16f9a6ead375d34b24bc7a05))
@@ -22,7 +29,6 @@ All notable changes to this project will be documented in this file. See [standa
 * add issue and pull request templates ([a8c53fb](https://github.com/Bridgetamana/SnippetShot-/commit/a8c53fbea9268aa3abfdd488fc78f4cbf71e4825))
 * add LICENSE file ([43cf53a](https://github.com/Bridgetamana/SnippetShot-/commit/43cf53a4a7c0344e77aa3604e332b8f781683286))
 * update SnippetShot extension to TypeScript ([b8e03b1](https://github.com/Bridgetamana/SnippetShot-/commit/b8e03b190712805d71e81482446d8c27d4cf8bfd))
-
 
 ### Bug Fixes
 
