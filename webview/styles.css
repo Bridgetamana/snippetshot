@@ -710,3 +710,24 @@ input:checked + .slider:before {
 .btn:hover .boop-line {
   animation: bounceLine 0.4s ease-in-out;
 }
+
+#snippet > div > div {
+  position: relative;
+}
+
+#snippet > div > div:hover {
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+#snippet > div > div.line-focus {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.has-focused-lines > div:not(.line-focus) {
+  opacity: 0.5;
+}
+
+.has-focused-lines > div:not(.line-focus):hover {
+  opacity: 0.5;
+}

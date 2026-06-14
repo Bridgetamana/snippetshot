@@ -700,6 +700,30 @@ import * as htmlToImage from 'html-to-image';
       });
   }
 
+  function updateSnippetFocusState(lineContainer) {
+    const hasFocus = lineContainer.querySelector('.line-focus') !== null;
+    lineContainer.classList.toggle('has-focused-lines', hasFocus);
+  }
+
+  snippetNode.addEventListener('click', (e) => {
+    const lineContainer = snippetNode.querySelector('div');
+    if (!lineContainer) return;
+    let target = e.target;
+    while (target && target !== lineContainer) {
+      if (target.parentNode === lineContainer && target.tagName === 'DIV') {
+        target.classList.toggle('line-focus');
+        updateSnippetFocusState(lineContainer);
+        const currentState = vscode.getState() || {};
+        vscode.setState({
+          ...currentState,
+          innerHTML: snippetNode.innerHTML,
+        });
+        break;
+      }
+      target = target.parentNode;
+    }
+  });
+
   function updateStateUI(data) {
     if (data.bgColor) {
       applyBackground(data.bgColor);
