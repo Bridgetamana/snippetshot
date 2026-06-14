@@ -34,18 +34,70 @@ import * as htmlToImage from 'html-to-image';
 
   const bgPicker = document.getElementById('bgPicker');
   const bgHex = document.getElementById('bgHex');
-  const windowTitle = document.getElementById('window-title');
+  const windowTitleContainer = document.getElementById('window-title-container');
+  const breadcrumbDisplay = document.getElementById('breadcrumb-display');
+  const bottomStatusContainer = document.getElementById('bottom-status-container');
+  const bottomStatusTab = document.getElementById('bottom-status-tab');
+  const bottomStatusInput = document.getElementById('bottom-status-input');
+
   const attributionEnabled = document.getElementById('attributionEnabled');
-  const attributionText = document.getElementById('attributionText');
-  const attributionOverlay = document.getElementById('attribution-overlay');
+  const toggleBreadcrumbs = document.getElementById('toggleBreadcrumbs');
+
   lineNoBtn.classList.add('active');
+
+  let currentFilePath = 'snippet.txt';
+  let currentLanguageId = 'plaintext';
+  let lastReceivedFilePath = 'snippet.txt';
+  let lastReceivedLanguageId = 'plaintext';
+
+  function updatePathMetadata(filePath, languageId) {
+    currentFilePath = filePath;
+    currentLanguageId = languageId;
+    const parts = filePath.replace(/\\/g, '/').split('/');
+    const filename = parts.pop();
+    breadcrumbDisplay.innerHTML = '';
+    parts.forEach((part) => {
+      if (!part) return;
+      const segSpan = document.createElement('span');
+      segSpan.className = 'path-segment';
+      segSpan.innerText = part;
+      breadcrumbDisplay.appendChild(segSpan);
+      const sepSpan = document.createElement('span');
+      sepSpan.className = 'path-separator';
+      sepSpan.innerText = ' > ';
+      breadcrumbDisplay.appendChild(sepSpan);
+    });
+    const fileSpan = document.createElement('span');
+    fileSpan.className = 'filename';
+    fileSpan.innerText = filename;
+    breadcrumbDisplay.appendChild(fileSpan);
+    const currentState = vscode.getState() || {};
+    vscode.setState({
+      ...currentState,
+      filePath,
+      languageId,
+    });
+  }
 
   const oldState = vscode.getState();
   if (oldState && oldState.innerHTML) {
     snippetNode.innerHTML = oldState.innerHTML;
   }
-  if (oldState && oldState.windowTitle) {
-    windowTitle.textContent = oldState.windowTitle;
+  if (oldState && oldState.filePath) {
+    currentFilePath = oldState.filePath;
+    currentLanguageId = oldState.languageId || 'plaintext';
+  }
+  updatePathMetadata(currentFilePath, currentLanguageId);
+
+  if (oldState) {
+    if (oldState.breadcrumbsVisible !== undefined) {
+      toggleBreadcrumbs.checked = oldState.breadcrumbsVisible;
+      windowTitleContainer.style.display = oldState.breadcrumbsVisible ? 'flex' : 'none';
+    }
+    if (oldState.attributionEnabled !== undefined) {
+      attributionEnabled.checked = oldState.attributionEnabled;
+      bottomStatusContainer.style.display = oldState.attributionEnabled ? 'block' : 'none';
+    }
   }
 
   vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
@@ -266,48 +318,72 @@ import * as htmlToImage from 'html-to-image';
     }
   }
 
+  let currentAttributionText = 'Created with SnippetShot';
+
   attributionEnabled.addEventListener('change', () => {
-    attributionText.style.display = attributionEnabled.checked ? 'block' : 'none';
-    updateAttribution();
-  });
-
-  attributionText.addEventListener('input', () => {
-    updateAttribution();
-  });
-
-  attributionText.addEventListener('paste', (e) => e.stopPropagation());
-  attributionText.addEventListener('keydown', (e) => e.stopPropagation());
-
-  function updateAttribution() {
-    if (attributionEnabled.checked) {
-      attributionOverlay.textContent = attributionText.value || 'SnippetShot';
-      attributionOverlay.style.display = 'block';
-    } else {
-      attributionOverlay.style.display = 'none';
-    }
-  }
-
-  windowTitle.addEventListener('keydown', (e) => {
-    e.stopPropagation();
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      windowTitle.blur();
-    }
-  });
-
-  windowTitle.addEventListener('blur', () => {
-    const cleanText = windowTitle.textContent.trim() || 'snippet.txt';
-    windowTitle.textContent = cleanText;
-
+    bottomStatusContainer.style.display = attributionEnabled.checked ? 'block' : 'none';
     const currentState = vscode.getState() || {};
     vscode.setState({
       ...currentState,
-      windowTitle: cleanText,
+      attributionEnabled: attributionEnabled.checked,
+    });
+    vscode.postMessage({
+      type: 'updateSettingsFromWebview',
+      data: {
+        attributionEnabled: attributionEnabled.checked,
+      },
     });
   });
 
-  windowTitle.addEventListener('paste', (e) => {
+  bottomStatusTab.addEventListener('click', () => {
+    bottomStatusTab.style.display = 'none';
+    bottomStatusInput.style.display = 'inline-block';
+    bottomStatusInput.focus();
+    bottomStatusInput.select();
+  });
+
+  bottomStatusInput.addEventListener('keydown', (e) => {
     e.stopPropagation();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      bottomStatusInput.blur();
+    }
+    if (e.key === 'Escape') {
+      bottomStatusInput.value = currentAttributionText;
+      bottomStatusInput.blur();
+    }
+  });
+
+  bottomStatusInput.addEventListener('blur', () => {
+    bottomStatusInput.style.display = 'none';
+    bottomStatusTab.style.display = 'inline-block';
+    const val = bottomStatusInput.value.trim() || 'SnippetShot';
+    currentAttributionText = val;
+    bottomStatusTab.innerText = val;
+    const currentState = vscode.getState() || {};
+    vscode.setState({
+      ...currentState,
+      attributionText: val,
+    });
+    vscode.postMessage({
+      type: 'updateSettingsFromWebview',
+      data: {
+        attributionText: val,
+      },
+    });
+  });
+
+  bottomStatusInput.addEventListener('paste', (e) => {
+    e.stopPropagation();
+  });
+
+  toggleBreadcrumbs.addEventListener('change', () => {
+    windowTitleContainer.style.display = toggleBreadcrumbs.checked ? 'flex' : 'none';
+    const currentState = vscode.getState() || {};
+    vscode.setState({
+      ...currentState,
+      breadcrumbsVisible: toggleBreadcrumbs.checked,
+    });
   });
 
   function getMinIndent(code) {
@@ -407,9 +483,13 @@ import * as htmlToImage from 'html-to-image';
 
     snippetNode.innerHTML = content;
 
+    if (lastReceivedFilePath) {
+      updatePathMetadata(lastReceivedFilePath, lastReceivedLanguageId);
+    }
+    const currentState = vscode.getState() || {};
     vscode.setState({
+      ...currentState,
       innerHTML: content,
-      windowTitle: windowTitle.textContent,
     });
     toggleLineNumbers(lineNumbersEnabled);
   });
@@ -641,20 +721,26 @@ import * as htmlToImage from 'html-to-image';
 
     if (type === 'init') {
       applyInitialSnippet();
-
-      const textToStore = windowTitle.textContent;
+      if (e.data.filePath) {
+        updatePathMetadata(e.data.filePath, e.data.languageId || 'plaintext');
+      }
+      const currentState = vscode.getState() || {};
       vscode.setState({
+        ...currentState,
         innerHTML: snippetNode.innerHTML,
-        windowTitle: textToStore,
       });
-
       toggleLineNumbers(lineNumbersEnabled);
       updateStateUI(e.data);
     } else if (type === 'update') {
+      lastReceivedFilePath = e.data.filePath;
+      lastReceivedLanguageId = e.data.languageId;
       document.execCommand('paste');
     } else if (type === 'restore') {
       if (innerHTML) {
         snippetNode.innerHTML = innerHTML;
+      }
+      if (e.data.filePath) {
+        updatePathMetadata(e.data.filePath, e.data.languageId || 'plaintext');
       }
       toggleLineNumbers(lineNumbersEnabled);
       updateStateUI(e.data);
@@ -677,7 +763,7 @@ import * as htmlToImage from 'html-to-image';
 
       if (attrEnabled !== undefined) {
         attributionEnabled.checked = attrEnabled;
-        attributionText.style.display = attrEnabled ? 'block' : 'none';
+        bottomStatusContainer.style.display = attrEnabled ? 'block' : 'none';
       }
 
       if (windowControlsEnabled !== undefined) {
@@ -695,10 +781,10 @@ import * as htmlToImage from 'html-to-image';
       }
 
       if (attrText) {
-        attributionText.value = attrText;
+        currentAttributionText = attrText;
+        bottomStatusTab.innerText = attrText;
+        bottomStatusInput.value = attrText;
       }
-
-      updateAttribution();
 
       if (snippetNode) {
         if (ligature) {

@@ -12,24 +12,34 @@
       <div id="snippet-container" class="snippet-container">
         <div class="snippet-window">
           <div class="window-header">
-            <div id="window-controls-mac" class="window-controls-mac">
+            <div id="window-controls-mac" class="window-controls-mac" style="display: none">
               <div class="mac-dot mac-dot-close"></div>
               <div class="mac-dot mac-dot-minimize"></div>
               <div class="mac-dot mac-dot-maximize"></div>
             </div>
-            <div
-              id="window-title"
-              class="window-title"
-              contenteditable="true"
-              spellcheck="false"
-              title="Click to rename tab"
-            >
-              snippet.txt
+            <div id="window-title-container" class="window-title-container">
+              <div id="breadcrumb-display" class="breadcrumb-display">
+                <span class="path-segment">src</span>
+                <span class="path-separator">&gt;</span>
+                <span class="filename">index.js</span>
+              </div>
             </div>
-            <div class="header-spacer"></div>
           </div>
           <div id="snippet"></div>
-          <div id="attribution-overlay" class="attribution-overlay">SnippetShot</div>
+          <div
+            id="bottom-status-container"
+            class="bottom-status-container"
+            title="Click to edit attribution"
+          >
+            <div id="bottom-status-tab" class="bottom-status-tab">Created with SnippetShot</div>
+            <input
+              type="text"
+              id="bottom-status-input"
+              class="bottom-status-input"
+              style="display: none"
+              spellcheck="false"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -237,8 +247,8 @@
       <div class="settings-section">
         <div class="settings-label">Window Controls</div>
         <div class="segmented-control" id="win-style-controls">
-          <button class="segment-btn active" data-val="mac">macOS</button>
-          <button class="segment-btn" data-val="none">None</button>
+          <button class="segment-btn" data-val="mac">macOS</button>
+          <button class="segment-btn active" data-val="none">None</button>
         </div>
       </div>
 
@@ -252,20 +262,25 @@
       </div>
 
       <div class="settings-section">
+        <div class="settings-label">Mockup Details</div>
         <div class="input-row">
-          <div class="settings-label">Watermark / Attribution</div>
+          <span class="settings-label-sub" style="font-size: 11px; color: var(--text-muted)"
+            >File Breadcrumbs</span
+          >
           <label class="switch">
-            <input type="checkbox" id="attributionEnabled" />
+            <input type="checkbox" id="toggleBreadcrumbs" checked />
             <span class="slider"></span>
           </label>
         </div>
-        <input
-          type="text"
-          id="attributionText"
-          class="text-input"
-          placeholder="SnippetShot"
-          style="width: 100%; display: none"
-        />
+        <div class="input-row">
+          <span class="settings-label-sub" style="font-size: 11px; color: var(--text-muted)"
+            >Attribution Tab</span
+          >
+          <label class="switch">
+            <input type="checkbox" id="attributionEnabled" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
     </div>
 

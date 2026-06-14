@@ -69,10 +69,21 @@ export function activate(context: vscode.ExtensionContext) {
 
       const fontFamily = vscode.workspace.getConfiguration('editor').get<string>('fontFamily');
       const bgColor = context.globalState.get('snippetshot.bgColor');
+      const activeEditor = vscode.window.activeTextEditor;
+      let filePath = 'snippet.txt';
+      let languageId = 'plaintext';
+      if (activeEditor) {
+        const document = activeEditor.document;
+        languageId = document.languageId;
+        const relativePath = vscode.workspace.asRelativePath(document.uri);
+        filePath = relativePath || path.basename(document.fileName);
+      }
       panel.webview.postMessage({
         type: 'init',
         fontFamily,
         bgColor,
+        filePath,
+        languageId,
       });
 
       syncSettings(panel);
@@ -132,7 +143,23 @@ export function activate(context: vscode.ExtensionContext) {
           break;
         }
         case 'updateSettingsFromWebview':
-          // Removed attribution caching (no action needed)
+          if (data) {
+            const config = vscode.workspace.getConfiguration('snippetshot');
+            if (data.attributionText !== undefined) {
+              config.update(
+                'attributionText',
+                data.attributionText,
+                vscode.ConfigurationTarget.Global
+              );
+            }
+            if (data.attributionEnabled !== undefined) {
+              config.update(
+                'attributionEnabled',
+                data.attributionEnabled,
+                vscode.ConfigurationTarget.Global
+              );
+            }
+          }
           break;
         case 'getAndUpdateCacheAndSettings':
           p.webview.postMessage({
@@ -203,7 +230,15 @@ function setupSelectionSync(panel: vscode.WebviewPanel) {
   return vscode.window.onDidChangeTextEditorSelection((e) => {
     if (e.selections[0] && !e.selections[0].isEmpty) {
       vscode.commands.executeCommand('editor.action.clipboardCopyWithSyntaxHighlightingAction');
-      panel.webview.postMessage({ type: 'update' });
+      const document = e.textEditor.document;
+      const relativePath = vscode.workspace.asRelativePath(document.uri);
+      const filePath = relativePath || path.basename(document.fileName);
+      const languageId = document.languageId;
+      panel.webview.postMessage({
+        type: 'update',
+        filePath,
+        languageId,
+      });
     }
   });
 }

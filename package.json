@@ -106,7 +106,7 @@
         "snippetshot.attributionEnabled": {
           "type": "boolean",
           "description": "Enable attribution text overlay on screenshots",
-          "default": false
+          "default": true
         },
         "snippetshot.attributionText": {
           "type": "string",
@@ -116,7 +116,7 @@
         "snippetshot.windowControlsEnabled": {
           "type": "boolean",
           "description": "Enable macOS style window controls (traffic lights) on screenshots",
-          "default": true
+          "default": false
         }
       }
     }
