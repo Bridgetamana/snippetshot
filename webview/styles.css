@@ -163,7 +163,7 @@ body::before {
 .bottom-status-container {
   position: absolute;
   bottom: 8px;
-  left: 14px;
+  left: 20px;
   z-index: 5;
   display: flex;
   align-items: center;
@@ -208,7 +208,7 @@ body::before {
   overflow: auto;
   scrollbar-width: none;
   display: flex;
-  padding: 16px 20px 36px 20px;
+  padding: 16px 0 36px 0;
   margin: 0;
   width: 100%;
   color: var(--text);
@@ -238,8 +238,10 @@ body::before {
 }
 
 #snippet > div > div {
-  display: inline-block;
+  display: flex;
   text-align: left;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .line-numbered {
@@ -713,6 +715,13 @@ input:checked + .slider:before {
 
 #snippet > div > div {
   position: relative;
+  transition: opacity 0.2s ease, filter 0.2s ease, background 0.2s ease;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 2px 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #snippet > div > div:hover {
@@ -721,13 +730,50 @@ input:checked + .slider:before {
 }
 
 #snippet > div > div.line-focus {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.065);
 }
 
-.has-focused-lines > div:not(.line-focus) {
-  opacity: 0.5;
+.theme-dark .has-focused-lines > div:not(.line-focus) {
+  opacity: 0.3;
+  filter: blur(0.5px);
 }
 
-.has-focused-lines > div:not(.line-focus):hover {
+.theme-dark .has-focused-lines > div:not(.line-focus):hover {
   opacity: 0.5;
+  filter: none;
+}
+
+.theme-light .line-number {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.theme-light .has-focused-lines > div:not(.line-focus) {
+  opacity: 0.45;
+  filter: none;
+}
+
+.theme-light .has-focused-lines > div:not(.line-focus):hover {
+  opacity: 0.75;
+}
+
+.theme-light #snippet > div > div.line-focus {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-light .bottom-status-tab {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 50%, #0f172a 100%);
+  color: #f8fafc;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.theme-light .bottom-status-tab:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 50%, #1e293b 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.theme-light .bottom-status-input {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 50%, #0f172a 100%);
+  color: #f8fafc;
+  border: 1.5px solid var(--accent);
 }

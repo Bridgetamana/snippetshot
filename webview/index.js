@@ -89,6 +89,15 @@ import * as htmlToImage from 'html-to-image';
   }
   updatePathMetadata(currentFilePath, currentLanguageId);
 
+  const snippetBgColor = getSnippetBgColor(snippetNode.innerHTML);
+  if (snippetBgColor) {
+    updateEnvironment(snippetBgColor);
+  } else {
+    const windowNode = snippetNode.closest('.snippet-window') || snippetNode;
+    windowNode.classList.remove('theme-light');
+    windowNode.classList.add('theme-dark');
+  }
+
   if (oldState) {
     if (oldState.breadcrumbsVisible !== undefined) {
       toggleBreadcrumbs.checked = oldState.breadcrumbsVisible;
@@ -107,6 +116,10 @@ import * as htmlToImage from 'html-to-image';
     if (initialTemplate && 'content' in initialTemplate) {
       snippetNode.innerHTML = '';
       snippetNode.appendChild(initialTemplate.content.cloneNode(true));
+      snippetNode.style.backgroundColor = '';
+      const windowNode = snippetNode.closest('.snippet-window') || snippetNode;
+      windowNode.classList.remove('theme-light');
+      windowNode.classList.add('theme-dark');
     }
   }
 
@@ -171,6 +184,36 @@ import * as htmlToImage from 'html-to-image';
     };
   }
 
+  function isColorLight(colorStr) {
+    if (!colorStr) return false;
+    let r = 0,
+      g = 0,
+      b = 0;
+    if (colorStr.startsWith('#')) {
+      const hex = colorStr.replace('#', '');
+      if (hex.length === 3) {
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+      } else if (hex.length === 6) {
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+      }
+    } else if (colorStr.startsWith('rgb')) {
+      const parts = colorStr.match(/\d+/g);
+      if (parts && parts.length >= 3) {
+        r = parseInt(parts[0], 10);
+        g = parseInt(parts[1], 10);
+        b = parseInt(parts[2], 10);
+      }
+    } else {
+      return false;
+    }
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return luminance > 0.5;
+  }
+
   function getSnippetBgColor(html) {
     const match = html.match(/background-color: (#[a-fA-F0-9]+)/);
     return match ? match[1] : undefined;
@@ -179,6 +222,10 @@ import * as htmlToImage from 'html-to-image';
   function updateEnvironment(snippetBgColor) {
     if (snippetBgColor && snippetNode) {
       snippetNode.style.backgroundColor = snippetBgColor;
+      const isLight = isColorLight(snippetBgColor);
+      const windowNode = snippetNode.closest('.snippet-window') || snippetNode;
+      windowNode.classList.toggle('theme-light', isLight);
+      windowNode.classList.toggle('theme-dark', !isLight);
     }
   }
 
