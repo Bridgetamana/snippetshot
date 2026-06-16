@@ -1,64 +1,33 @@
 # Contributing to SnippetShot
 
-First off, thank you for considering contributing to SnippetShot! It's people like you that make the open-source community such a great place.
+Thanks for your interest in contributing to SnippetShot.
+Please take a moment to review this document before submitting your pull request (PR). Before taking on an issue, check open pull requests to ensure no one is working on it.  
 
-We welcome any type of contribution, not just code. You can help with:
+## How to Contribute
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
-- Becoming a maintainer
-- Giving the repo a star
+### Reporting Bugs
 
-## Getting Started
+- Open an issue describing the bug
+- Add screenshots if relevant
 
-To get started, you'll need to have [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) installed.
+### Suggesting Features
 
-1.  **Fork the repository** on GitHub.
-2.  **Clone your fork** to your local machine:
-    ```bash
-    git clone https://github.com/Bridgetamana/SnippetShot-.git
-    ```
-3.  **Navigate to the project directory:**
-    ```bash
-    cd SnippetShot
-    ```
-4.  **Install the dependencies:**
-    ```bash
-    npm install
-    ```
-5.  **Run the extension in development mode:**
-    - Open the project in VS Code.
-    - Press `F5` to open a new VS Code window with the extension loaded.
+- Open an issue with your proposal
+- Keep it aligned with the project scope
 
-## Making Changes
+### Submitting Changes
 
-1.  **Create a new branch** for your changes:
-    ```bash
-    git checkout -b my-feature-branch
-    ```
-2.  **Make your changes** to the code.
-3.  **Test your changes** to make sure they work as expected.
-4.  **Commit your changes** with a clear and descriptive commit message:
-    ```bash
-    git commit -m "feat: Add a new feature"
-    ```
-5.  **Push your changes** to your fork:
-    ```bash
-    git push origin my-feature-branch
-    ```
-6.  **Open a pull request** from your fork to the `main` branch of the original repository.
+1. Fork the repository
+2. Create a branch: `git checkout -b fix/issue-name`
+3. Make your changes
+4. Test to ensure everything works as intended
+5. Commit: `git commit -m "fix: description"`
+6. Push and open a Pull Request
 
-## Pull Request Guidelines
+## Questions?
 
-- Please make sure your pull request has a clear and descriptive title and description.
-- If your pull request addresses an open issue, please reference the issue number in the description (e.g., `Closes #123`).
-- Please make sure your code follows the existing code style.
-- Please make sure your code is well-tested.
+Open an issue for discussion.
 
-## Code of Conduct
+## License
 
-We have a [Code of Conduct](CODE_OF_CONDUCT.md) that we expect all contributors to follow. Please make sure you are familiar with it before contributing.
-
-Thank you for your contribution!
+By contributing, you agree your code will use the project's license.
